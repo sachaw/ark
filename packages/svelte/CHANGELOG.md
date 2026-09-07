@@ -1,5 +1,11 @@
 # @ark-ui/svelte
 
+## [5.24.2] - 2026-09-07
+
+### Fixed
+
+- Fix issue where the tour backdrop stayed visible after the tour was closed
+
 ## [5.24.1] - 2026-08-28
 
 ### Fixed
