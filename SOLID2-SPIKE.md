@@ -97,10 +97,65 @@ The render pass caught three real bugs after types were already clean:
   and babel with **per-extension overrides** (ark's `.ts` files use generic
   arrows that a TSX parser misreads as JSX).
 
+## Tests
+
+Ark's suite runs on Solid 2: **322 / 330 passing (41 / 47 files)**.
+
+Toolchain: vitest 5 + vite 8 + `@solidjs/vite-plugin@3.0.0-next.39` +
+`@solidjs/testing-library@1.0.0-beta.3`. `vite-plugin-solid` is the 1.x
+compiler and cannot build this tree. `vitest.solid2.config.mts` mirrors ark's
+exports map so the self-referential `@ark-ui/solid/*` fixture imports resolve.
+85 test/fixture files and all 620 storybook examples were codemodded.
+
+Progression: 164 → 246 → 291 → 302 → **322** passing.
+
+### Five bugs only the suite caught
+
+Typecheck was clean and the render harness was green when all of these were
+still live:
+
+1. **`onCleanup` inside `onSettled` is forbidden in 2.0** — you must *return*
+   the cleanup. The `onMount`→`onSettled` codemod left 4 of these, and they
+   alone accounted for 90 failures.
+2. **The same codemod renamed `Frame`'s public `onMount` prop.** A blind
+   identifier rename broke the component's API. Reverted; the other 8 renames
+   were audited and are genuine Solid lifecycle imports.
+3. **`htmlFor` is no longer mapped to `for`** — it renders as the invalid
+   `htmlfor`, so labels silently stop associating with their controls.
+4. **zag emits boolean `aria-*` values**, which 2.0 renders as an empty
+   attribute (`aria-hidden=""`) that the accessibility tree ignores. ARIA
+   attributes are strings; the adapter now normalizes them. This one fix took
+   302 → 322.
+5. **zag's `mergeProps` resolved accessor sources eagerly at call time.** In
+   2.0 a component body runs inside the parent's `insert` compute, so that read
+   subscribed the *parent* to child state — every child-state change re-created
+   the entire subtree and lost element identity (dropped focus, restarted
+   animations, stale references in tests). Now resolved under `untrack`.
+   Minimal repro: `spike-env/render/repro-mergeprops-overtrack.js`.
+
+`lucide-solid` is Solid 1.x only (its `Icon.tsx` calls the removed
+`splitProps`). It is test/story decoration with zero library-source usage, so
+the fork stubs it (`test-stubs/lucide-solid.tsx`) rather than forking an icon set.
+
+### The 6 remaining failures
+
+All are component *interaction* behaviours, all in jsdom **and** happy-dom, with
+zag pinned to exactly the versions ark specifies:
+
+- `select` ×2 — clicking an item does not commit the selection (neither
+  `user.click` nor `fireEvent.click`); the machine never leaves the open state.
+  Solid 2 event delegation itself is fine (verified separately), and the same
+  flow works when driven directly in the render harness.
+- `menu` — nested submenu does not become visible.
+- `tabs` — content not visible after activating a tab.
+- `toast` — show/hide cycle.
+- `field` — context not updating inside `Field.Item` when `invalid` changes.
+
+These are unresolved, not explained away.
+
 ## What is NOT done
 
-- Ark's own test suite (45 `.test.tsx`) and 67 `.stories.tsx` were excluded from
-  the typecheck and have not been ported or run.
+- 6 interaction tests still fail (see above); 67 `.stories.tsx` are unported.
 - Only collapsible and select were exercised at runtime; the other ~63
   components typecheck and compile but are unproven behaviourally.
 - No SSR / hydration path was tested.
