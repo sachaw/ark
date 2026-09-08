@@ -57,21 +57,3 @@ class IntersectionObserverMock {
 }
 
 vi.stubGlobal('IntersectionObserver', IntersectionObserverMock)
-
-// jsdom implements neither pointer capture nor PointerEvent; zag's pointer
-// interactions call these during a real `user.click` sequence (fireEvent.click
-// skips them, which is why only the userEvent-driven tests were affected).
-if (!Element.prototype.setPointerCapture) {
-  Element.prototype.setPointerCapture = function () {}
-  Element.prototype.releasePointerCapture = function () {}
-  Element.prototype.hasPointerCapture = function () {
-    return false
-  }
-}
-if (typeof globalThis.PointerEvent === 'undefined') {
-  globalThis.PointerEvent = class PointerEvent extends MouseEvent {
-    pointerId = 1
-    pointerType = 'mouse'
-    isPrimary = true
-  } as unknown as typeof globalThis.PointerEvent
-}
