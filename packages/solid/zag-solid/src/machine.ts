@@ -49,7 +49,13 @@ export function useMachine<T extends MachineSchema>(
 
   const prop: any = createProp(props)
 
-  const context: any = machine.context?.({
+  // Seeding is a ONE-SHOT read, and 2.0 warns (STRICT_READ_UNTRACKED) when a
+  // reactive value is read outside a tracking scope because it "will not
+  // update" — which is exactly the intent here: these are initial values, and
+  // the machine tracks subsequent changes through its own bindables. Reading
+  // them untracked states that intent instead of tripping the diagnostic.
+  // `prop` itself stays tracking, because `computed` genuinely depends on it.
+  const context: any = untrack(() => machine.context?.({
     prop,
     bindable: createBindable,
     get scope() {
@@ -68,7 +74,7 @@ export function useMachine<T extends MachineSchema>(
     getEvent() {
       return getEvent()
     },
-  })
+  }))
 
   const ctx: BindableContext<T> = {
     get(key) {
@@ -114,7 +120,7 @@ export function useMachine<T extends MachineSchema>(
       },
     })
 
-  const refs = createRefs(machine.refs?.({ prop, context: ctx }) ?? {})
+  const refs = createRefs(untrack(() => machine.refs?.({ prop, context: ctx })) ?? {})
 
   const getParams = (): Params<T> => ({
     state: getState(),
@@ -193,7 +199,7 @@ export function useMachine<T extends MachineSchema>(
   }
 
   const state = createBindable(() => ({
-    defaultValue: resolveStateValue(machine, machine.initialState({ prop })),
+    defaultValue: untrack(() => resolveStateValue(machine, machine.initialState({ prop }))),
     onChange(nextState, prevState) {
       const { exiting, entering } = getExitEnterStates(machine, prevState, nextState, transitionRef.current?.reenter)
 

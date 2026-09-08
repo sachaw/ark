@@ -9,7 +9,13 @@ export interface MenuItemGroupLabelProps extends HTMLProps<'div'>, MenuItemGroup
 export const MenuItemGroupLabel = (props: MenuItemGroupLabelProps) => {
   const context = useMenuContext()
   const itemGroupContext = useMenuItemGroupContext()
-  const mergedProps = mergeProps(context().getItemGroupLabelProps({ htmlFor: itemGroupContext.id }), props)
+  // Accessor, not a resolved object: every sibling part passes `() => …` so
+  // the props stay lazy. Resolving `context()` inline reads it in the component
+  // body, which 2.0 flags as a read that will not update.
+  const mergedProps = mergeProps(
+    () => context().getItemGroupLabelProps({ htmlFor: itemGroupContext.id }),
+    props,
+  )
 
   return <ark.div {...mergedProps} />
 }
