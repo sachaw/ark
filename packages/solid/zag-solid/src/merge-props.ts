@@ -36,11 +36,29 @@ export function mergeProps(...sources: any[]) {
         Object.defineProperty(target, key, {
           enumerable: true,
           get() {
+            // Solid 2's `class` takes a ClassValue -- string | number |
+            // boolean | null | undefined | Record<string, boolean> |
+            // ClassValue[]. zag folds class layers with a string-only clsx
+            // (`args.map(s => s?.trim?.()).filter(Boolean).join(" ")`), so an
+            // array or object layer has no `.trim` and is dropped: the part
+            // renders with NO classes at all, silently. Collect the layers
+            // into an array instead and let the renderer flatten it -- nested
+            // arrays merge, object entries toggle, falsy entries are skipped,
+            // and source order still decides precedence.
+            if (key === "class" || key === "className") {
+              const layers: unknown[] = []
+              for (let i = 0; i < sources.length; i++) {
+                let s = sources[i]
+                if (typeof s === "function") s = s()
+                const v = (s || {})[key]
+                if (v != null && v !== false && v !== "") layers.push(v)
+              }
+              if (layers.length === 0) return undefined
+              return layers.length === 1 ? layers[0] : layers
+            }
             let e = {}
             if (
               key === "style" ||
-              key === "class" ||
-              key === "className" ||
               key === "data-ownedby" ||
               key.startsWith("on")
             ) {
