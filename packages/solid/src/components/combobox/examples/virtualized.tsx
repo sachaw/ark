@@ -2,7 +2,7 @@ import { Combobox, useListCollection } from '@ark-ui/solid/combobox'
 import { useFilter } from '@ark-ui/solid/locale'
 import { createVirtualizer } from '@tanstack/solid-virtual'
 import { CheckIcon, ChevronsUpDownIcon } from 'lucide-solid'
-import { Portal } from 'solid-js/web'
+import { Portal } from '@solidjs/web'
 import styles from 'styles/combobox.module.css'
 
 export const Virtualized = () => {

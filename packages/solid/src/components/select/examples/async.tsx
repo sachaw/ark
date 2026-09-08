@@ -1,7 +1,7 @@
 import { Select, createListCollection } from '@ark-ui/solid/select'
 import { ChevronsUpDownIcon } from 'lucide-solid'
-import { Index, Match, Switch, createMemo, createSignal } from 'solid-js'
-import { Portal } from 'solid-js/web'
+import { For, Match, Switch, createMemo, createSignal } from 'solid-js'
+import { Portal } from '@solidjs/web'
 import styles from 'styles/select.module.css'
 
 function loadData() {
@@ -54,14 +54,14 @@ export const Async = () => {
                 <div class={styles.Item}>Error: {error()?.message}</div>
               </Match>
               <Match when={items() !== null}>
-                <Index each={collection().items}>
+                <For each={collection().items} keyed={false}>
                   {(item) => (
                     <Select.Item class={styles.Item} item={item()}>
                       <Select.ItemText class={styles.ItemText}>{item()}</Select.ItemText>
                       <Select.ItemIndicator class={styles.ItemIndicator}>✓</Select.ItemIndicator>
                     </Select.Item>
                   )}
-                </Index>
+                </For>
               </Match>
             </Switch>
           </Select.Content>

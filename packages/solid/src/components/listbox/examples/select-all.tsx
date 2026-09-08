@@ -1,6 +1,6 @@
 import { Listbox, createListCollection, useListboxContext } from '@ark-ui/solid/listbox'
 import { CheckIcon, MinusIcon } from 'lucide-solid'
-import { Index, Show } from 'solid-js'
+import { For, Show } from 'solid-js'
 import styles from 'styles/listbox.module.css'
 
 const frameworks = createListCollection({
@@ -49,7 +49,7 @@ export const SelectAll = () => {
     <Listbox.Root class={styles.Root} collection={frameworks} selectionMode="multiple">
       <SelectAllHeader />
       <Listbox.Content class={styles.Content}>
-        <Index each={frameworks.items}>
+        <For each={frameworks.items} keyed={false}>
           {(item) => (
             <Listbox.Item class={styles.Item} item={item()}>
               <Listbox.ItemText class={styles.ItemText}>{item().label}</Listbox.ItemText>
@@ -58,7 +58,7 @@ export const SelectAll = () => {
               </Listbox.ItemIndicator>
             </Listbox.Item>
           )}
-        </Index>
+        </For>
       </Listbox.Content>
     </Listbox.Root>
   )

@@ -1,7 +1,7 @@
 import { mergeProps } from '@zag-js/solid'
 import { omit } from 'solid-js'
 import type { JSX } from '@solidjs/web'
-import { Dynamic } from '@solidjs/web'
+import { dynamic } from '@solidjs/web'
 import type { Assign } from '../types.ts'
 
 type ElementType = keyof JSX.IntrinsicElements
@@ -48,6 +48,17 @@ export type HTMLArkProps<E extends ElementType> = Assign<HTMLProps<E>, Polymorph
 type ArkComponent<E extends ElementType> = (props: HTMLArkProps<E>) => JSX.Element
 
 const withAsProp = <T extends ElementType>(Component: T) => {
+  // 2.0 has two dynamic forms and the difference is load-bearing here: the
+  // `<Dynamic component={...}>` JSX wrapper RE-CREATES its host element when
+  // props change, while the `dynamic()` factory keeps a stable component
+  // identity and patches in place. Re-creation detaches the node, so anything
+  // holding a reference loses it — focus is dropped, animations restart, and
+  // every `getByRole(...)`-then-assert test fails against a stale node.
+  //
+  // `withAsProp` is memoised per element name by `jsxFactory`, so this runs
+  // once per tag.
+  const Rendered = dynamic(() => Component)
+
   const ArkComponent: ArkComponent<T> = (props) => {
     // 2.0: `splitProps` is replaced by `omit`, which is variadic and returns
     // ONLY the rest. The "local" half is just read off `props` directly —
@@ -60,7 +71,7 @@ const withAsProp = <T extends ElementType>(Component: T) => {
       return props.asChild(propsFn)
     }
     // @ts-expect-error
-    return <Dynamic component={Component} {...parentProps} />
+    return <Rendered {...parentProps} />
   }
 
   return ArkComponent

@@ -1,6 +1,6 @@
 import { Listbox, createListCollection } from '@ark-ui/solid/listbox'
 import { CheckIcon } from 'lucide-solid'
-import { Index } from 'solid-js'
+import { For } from 'solid-js'
 import styles from 'styles/listbox.module.css'
 
 export const Horizontal = () => {
@@ -40,7 +40,7 @@ export const Horizontal = () => {
     <Listbox.Root class={styles.Root} collection={collection} orientation="horizontal">
       <Listbox.Label class={styles.Label}>Select Album</Listbox.Label>
       <Listbox.Content class={styles.Content}>
-        <Index each={collection.items}>
+        <For each={collection.items} keyed={false}>
           {(item) => (
             <Listbox.Item class={styles.ItemCard} item={item()}>
               <Listbox.ItemIndicator class={styles.ItemCardIndicator}>
@@ -51,7 +51,7 @@ export const Horizontal = () => {
               <span class={styles.ItemCardArtist}>{item().artist}</span>
             </Listbox.Item>
           )}
-        </Index>
+        </For>
       </Listbox.Content>
     </Listbox.Root>
   )

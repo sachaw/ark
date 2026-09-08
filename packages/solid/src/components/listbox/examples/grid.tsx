@@ -1,6 +1,6 @@
 import { createGridCollection } from '@ark-ui/solid/collection'
 import { Listbox } from '@ark-ui/solid/listbox'
-import { Index } from 'solid-js'
+import { For } from 'solid-js'
 import styles from 'styles/listbox.module.css'
 
 export const Grid = () => {
@@ -34,13 +34,13 @@ export const Grid = () => {
     <Listbox.Root class={styles.Root} collection={collection}>
       <Listbox.Label class={styles.Label}>Pick a reaction</Listbox.Label>
       <Listbox.Content class={styles.GridContent}>
-        <Index each={collection.items}>
+        <For each={collection.items} keyed={false}>
           {(item) => (
             <Listbox.Item class={styles.GridItem} item={item()}>
               <Listbox.ItemText>{item().label}</Listbox.ItemText>
             </Listbox.Item>
           )}
-        </Index>
+        </For>
       </Listbox.Content>
     </Listbox.Root>
   )

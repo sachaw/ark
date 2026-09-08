@@ -1,7 +1,7 @@
 import { Select, createListCollection } from '@ark-ui/solid/select'
 import { CheckIcon, ChevronsUpDownIcon, MinusIcon, PlusIcon } from 'lucide-solid'
 import { createMemo, createSignal } from 'solid-js'
-import { Index } from 'solid-js/web'
+import { For } from '@solidjs/web'
 import button from 'styles/button.module.css'
 import styles from 'styles/select.module.css'
 
@@ -45,7 +45,7 @@ export const ReactiveCollection = () => {
           <Select.Content class={styles.Content}>
             <Select.ItemGroup class={styles.ItemGroup}>
               <Select.ItemGroupLabel class={styles.ItemGroupLabel}>Framework</Select.ItemGroupLabel>
-              <Index each={collection().items}>
+              <For each={collection().items} keyed={false}>
                 {(item) => (
                   <Select.Item class={styles.Item} item={item()}>
                     <Select.ItemText class={styles.ItemText}>{item().label}</Select.ItemText>
@@ -54,7 +54,7 @@ export const ReactiveCollection = () => {
                     </Select.ItemIndicator>
                   </Select.Item>
                 )}
-              </Index>
+              </For>
             </Select.ItemGroup>
           </Select.Content>
         </Select.Positioner>

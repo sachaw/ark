@@ -41,7 +41,7 @@ export const FieldItem = (props: FieldItemProps) => {
       getLabelProps: () => ({
         ...parent.getLabelProps(),
         id: labelId,
-        htmlFor: controlId,
+        for: controlId,
       }),
       getInputProps: () => ({
         ...getControlProps(),

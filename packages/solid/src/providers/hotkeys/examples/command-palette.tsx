@@ -10,7 +10,7 @@ import {
 import { useFilter } from '@ark-ui/solid/locale'
 import { CornerDownLeftIcon, SearchIcon } from 'lucide-solid'
 import { For, Show, createEffect, createSignal } from 'solid-js'
-import { Portal } from 'solid-js/web'
+import { Portal } from '@solidjs/web'
 import button from 'styles/button.module.css'
 import styles from 'styles/command-palette.module.css'
 

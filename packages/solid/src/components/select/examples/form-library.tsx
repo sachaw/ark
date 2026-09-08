@@ -2,7 +2,7 @@ import { Select, createListCollection } from '@ark-ui/solid/select'
 import { ChevronsUpDownIcon, XIcon } from 'lucide-solid'
 import { createForm, getValue, setValue } from '@modular-forms/solid'
 import { createMemo } from 'solid-js'
-import { Index, Portal } from 'solid-js/web'
+import { For, Portal } from '@solidjs/web'
 import button from 'styles/button.module.css'
 import styles from 'styles/select.module.css'
 
@@ -58,14 +58,14 @@ export const FormLibrary = () => {
                   <Select.Content class={styles.Content}>
                     <Select.ItemGroup class={styles.ItemGroup}>
                       <Select.ItemGroupLabel class={styles.ItemGroupLabel}>Frameworks</Select.ItemGroupLabel>
-                      <Index each={frameworks.items}>
+                      <For each={frameworks.items} keyed={false}>
                         {(item) => (
                           <Select.Item class={styles.Item} item={item()}>
                             <Select.ItemText class={styles.ItemText}>{item().label}</Select.ItemText>
                             <Select.ItemIndicator class={styles.ItemIndicator}>✓</Select.ItemIndicator>
                           </Select.Item>
                         )}
-                      </Index>
+                      </For>
                     </Select.ItemGroup>
                   </Select.Content>
                 </Select.Positioner>

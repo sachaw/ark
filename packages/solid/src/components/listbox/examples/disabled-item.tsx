@@ -1,6 +1,6 @@
 import { Listbox, createListCollection } from '@ark-ui/solid/listbox'
 import { CheckIcon } from 'lucide-solid'
-import { Index } from 'solid-js'
+import { For } from 'solid-js'
 import styles from 'styles/listbox.module.css'
 
 export const DisabledItem = () => {
@@ -17,7 +17,7 @@ export const DisabledItem = () => {
     <Listbox.Root class={styles.Root} collection={collection}>
       <Listbox.Label class={styles.Label}>Select Plan</Listbox.Label>
       <Listbox.Content class={styles.Content}>
-        <Index each={collection.items}>
+        <For each={collection.items} keyed={false}>
           {(item) => (
             <Listbox.Item class={styles.Item} item={item()}>
               <Listbox.ItemText class={styles.ItemText}>{item().label}</Listbox.ItemText>
@@ -26,7 +26,7 @@ export const DisabledItem = () => {
               </Listbox.ItemIndicator>
             </Listbox.Item>
           )}
-        </Index>
+        </For>
       </Listbox.Content>
     </Listbox.Root>
   )

@@ -1,12 +1,12 @@
 import { Field } from '@ark-ui/solid/field'
 import { PinInput } from '@ark-ui/solid/pin-input'
-import { Index } from 'solid-js'
+import { For } from 'solid-js'
 
 export const ComponentUnderTest = (props: PinInput.RootProps) => (
   <PinInput.Root {...props}>
     <PinInput.Label>Label</PinInput.Label>
     <PinInput.Control>
-      <Index each={[0, 1, 2]}>{(id) => <PinInput.Input index={id()} />}</Index>
+      <For each={[0, 1, 2]} keyed={false}>{(id) => <PinInput.Input index={id()} />}</For>
     </PinInput.Control>
     <PinInput.HiddenInput />
   </PinInput.Root>
@@ -17,7 +17,7 @@ export const PinInputWithField = (props: Field.RootProps) => (
     <PinInput.Root>
       <PinInput.Label>Label</PinInput.Label>
       <PinInput.Control>
-        <Index each={[0, 1, 2]}>{(id) => <PinInput.Input index={id()} />}</Index>
+        <For each={[0, 1, 2]} keyed={false}>{(id) => <PinInput.Input index={id()} />}</For>
       </PinInput.Control>
       <PinInput.HiddenInput />
     </PinInput.Root>
