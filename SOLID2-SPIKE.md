@@ -5,83 +5,103 @@ Branch `solid-2`, forked from chakra-ui/ark @ main (MIT). Validated against
 
 ## Verdict
 
-Viable. No architectural blocker was found. The work is bounded and
-concentrated, not spread across the component surface.
+**Done and working.** The whole `@ark-ui/solid` adapter typechecks clean against
+`solid-js@2.0.0-rc.6`, compiles with `babel-preset-solid@2.0.0-rc.2`, and real
+components render and behave correctly. No architectural blocker exists.
 
-## What was actually ported
+| | result |
+|---|---|
+| ark adapter typecheck (955 files / 21.3k LOC) | **0 errors** (from 507) |
+| forked `@zag-js/solid` binding typecheck | **0 errors** |
+| babel build w/ Solid 2 JSX transform | **1738 files** |
+| runtime assertions (4 suites) | **33 / 33 pass** |
 
-**`@zag-js/solid` (594 LOC, vendored into `packages/solid/zag-solid/`)** —
-lives in a *different repo* (chakra-ui/zag), so a fork of ark alone is not
-enough. This is the only Solid-coupled zag package; the other 67 zag deps are
-framework-agnostic state machines and need zero changes.
+## What was ported
 
-Fully ported, typechecks clean, **18/18 runtime assertions pass** against real
-`@zag-js/collapsible` and `@zag-js/select` machines (`spike-env/rt/`).
+**`@zag-js/solid` (594 LOC, vendored into `packages/solid/zag-solid/`)** — lives
+in a *different repo* (chakra-ui/zag), so forking ark alone is not enough. It is
+the only Solid-coupled zag package; the other 67 deps are framework-agnostic
+state machines needing zero changes.
 
 | file | change |
 |---|---|
-| `bindable.ts` | **redesigned** — see below |
-| `machine.ts` | `onMount`+`onCleanup` → single `onSettled` w/ returned cleanup; `mergeProps` → `merge`; `flush` now drains Solid's queue |
-| `track.ts` | manual `prevDeps` bookkeeping → native `createEffect(compute, apply)`; `untrack` on the callback |
-| `use-sync-external-store.ts` | `onMount`/`onCleanup` → `onSettled`; generic `createSignal` cast |
-| `normalize-props.ts` | `JSX` type ← `@solidjs/web` |
+| `bindable.ts` | **redesigned** — shadow cell, see below |
+| `machine.ts` | `onMount`+`onCleanup` → one `onSettled` w/ returned cleanup; `mergeProps` → `merge`; `flush` defers a real drain |
+| `track.ts` | manual `prevDeps` bookkeeping → native `createEffect(compute, apply)` |
+| `use-sync-external-store.ts` | `onSettled`; generic `createSignal` cast |
+| `normalize-props.ts` | `JSX` ← `@solidjs/web`; `PropTypes` narrowed |
 | `refs.ts`, `merge-props.ts` | **unchanged** — no Solid coupling |
 
-### The one real design problem
+### The core design problem
 
 Solid 2 commits signal writes on flush: `setValue(x); value()` returns the OLD
-value until the microtask drains. zag's machine reads state back
-*synchronously* inside a transition (`send` reads `state.get()` right after a
-prior `state.set()`), so a literal port silently transitions from stale state.
+value until the microtask drains. zag's machine reads state back *synchronously*
+inside a transition, so a literal port silently transitions from stale state.
 
-Fix in `bindable.ts`: keep the authoritative value in a plain shadow cell and
-demote the signal to a pure change notification. `get()` reads the shadow
-(synchronous, always current) while still subscribing, so rendering stays
-reactive and the machine stays correct. Covered by the
-"two sends in one tick" and "last write wins across one tick" assertions.
+`bindable.ts` now keeps the authoritative value in a plain shadow cell and
+demotes the signal to a pure change notification: `get()` is synchronous and
+always current, while reads still subscribe.
 
-## Ark component layer (955 files / 21.3k LOC)
+## Ark component layer
 
-Far smaller than the raw grep suggests: **495 of ark's 498 `mergeProps` call
-sites import zag's own implementation**, which has no Solid coupling and needs
-no change. Ark's real Solid surface is ~30 distinct symbols.
+Far smaller than it looks — **495 of ark's 498 `mergeProps` call sites import
+zag's own implementation**, which has no Solid coupling.
 
-Codemod applied (`/tmp/codemod.py`): 109 files `JSX` → `@solidjs/web`,
-10 `onMount` → `onSettled`, 6 `solid-js/web` → `@solidjs/web`, 4 jsx-runtime,
-2 `mergeProps` → `merge`, 1 `solid-js/store` → `solid-js`.
+Errors collapsed via chokepoints, not file-by-file grind:
 
-Typecheck errors, and how concentrated they are:
+| after | errors |
+|---|---|
+| codemod only | 507 |
+| `factory.tsx` (`splitProps`→`omit`, `ComponentProps` gone) | 177 |
+| `splitProps` compat shim (keeps the 1.x `[picked, rest]` tuple, ~200 call sites untouched) | 155 |
+| attribute-aware `NarrowAttr` for `RemoveAttribute` widening | 78 |
+| `compose-refs.ts` (2.0 ref arrays) | 53 |
+| `Index` → `<For keyed={false}>` (7 files) | 36 |
+| 11 × `createEffect` → `(compute, apply)` | 24 |
+| context-as-provider, `merge` typing, aria/frame/misc | **0** |
 
-| after | errors | what moved it |
-|---|---|---|
-| codemod only | 507 | |
-| + `factory.tsx` ported | 177 | one file: `splitProps`→`omit`, `ComponentProps` removed |
-| + `splitProps` compat shim | **155** | one file: keeps the 1.x `[picked, rest]` tuple so ~200 call sites stay untouched |
+## Findings a typecheck could never catch
 
-## What remains (155 errors)
+The render pass caught three real bugs after types were already clean:
 
-- **~108 errors, one systemic cause.** Solid 2 widened every JSX attribute to
-  `T | RemoveAttribute` (`undefined | false`). Ark's and zag's props both
-  declare the narrow `id?: string`, so component roots can no longer extend
-  both (TS2320) or forward props into their machine (TS2345). **Not** a
-  one-line narrowing — `Exclude<T[K], false>` also destroys genuine boolean
-  attributes (`disabled?: boolean` → `true`) and made it *worse*, 155 → 644.
-  Needs an attribute-aware mapped type or a widening of ark's base props.
-- 12 × `createEffect` single-arg → `(compute, apply)`. Per-site judgement.
-- 7 files `Index` → `<For keyed={false}>` (callback shape flips).
-- 2 files `.Provider` → `<Context value={...}>`; 1 × `on()` → split effect.
-- 10 implicit-any, 5 index-signature, ~8 misc.
+1. **Two-arg `createEffect` runs its compute EAGERLY.** Any effect referencing a
+   `const` declared later in the component body now throws a TDZ
+   `ReferenceError`. Safe under 1.x, where the single-arg body was deferred.
+2. **The `splitProps` shim defined absent keys.** 1.x `splitProps` buckets the
+   source's *own* keys; defining every requested key as an enumerable getter
+   makes absent ones `undefined`, which then clobbers defaults when the result
+   is spread (`{ id, ...rest }` rendered `id="collapsible:undefined"`).
+3. **Default-less `createContext` throws in 2.0.** `getContext` raises
+   `ContextNotFoundError` whenever the resolved value is `undefined`, so a
+   context can no longer model "optional". The fork parks a sentinel default and
+   maps it back to `undefined`, preserving ark's `strict: false` behaviour.
 
-## Gotchas worth recording
+## Other 2.0 gotchas worth recording
 
 - `solid-js` resolves to the **server build** under Node's default conditions;
-  effects never run. Test with `--conditions=browser --conditions=development`.
-- `createSignal<T>(value: Exclude<T, Function>)` — generic library code holding
-  a possibly-function value cannot select the plain-value overload without a cast.
+  effects never run. Use `--conditions=browser --conditions=development`.
+- `createSignal<T>(value: Exclude<T, Function>)` — generic library code holding a
+  possibly-function value needs a cast to select the plain-value overload.
 - `onSettled` returning a cleanup **hard-errors** if unowned
-  (`SETTLED_CLEANUP_UNOWNED`). `useMachine` now requires a live owner at call
-  time; an `await` before it loses the owner. 1.x only warned.
+  (`SETTLED_CLEANUP_UNOWNED`); an `await` before `useMachine` loses the owner.
 - `flush()` inside an effect's *apply* phase is a warned no-op, and
   `getObserver()` is null there (apply runs untracked) so you cannot detect it.
-  Defer with `queueMicrotask`.
-- Ark's repo uses `bun`; this spike used `npm` + `node --experimental-strip-types`.
+- `createMemo` returns a **branded** `SourceAccessor<T>`, so
+  `ReturnType<typeof useThing>` no longer accepts a plain arrow function.
+- Enumerated aria attributes are `"true" | "false"` strings only — a real
+  boolean (`'aria-hidden': true`) is now a type error.
+- `merge` resolves function sources at runtime (wraps them in a memo) but the
+  `Merge<T>` *type* does not model it; cast the argument, not the result.
+- `createMemo(fn, [deps])` — the 2nd slot is `MemoOptions`, never a dep array.
+- Ark's repo uses `bun`; this spike used npm + `node --experimental-strip-types`
+  and babel with **per-extension overrides** (ark's `.ts` files use generic
+  arrows that a TSX parser misreads as JSX).
+
+## What is NOT done
+
+- Ark's own test suite (45 `.test.tsx`) and 67 `.stories.tsx` were excluded from
+  the typecheck and have not been ported or run.
+- Only collapsible and select were exercised at runtime; the other ~63
+  components typecheck and compile but are unproven behaviourally.
+- No SSR / hydration path was tested.
+- Not built through ark's real pipeline (tsup) or published.
