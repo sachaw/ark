@@ -8,7 +8,11 @@ export interface UseControllableStateProps<T> {
 }
 
 export function useControllableState<T>(props: UseControllableStateProps<T>) {
-  const [uncontrolledValue, setUncontrolledValue] = createSignal(runIfFn(props.defaultValue))
+  // 2.0 overloads a function first-arg as a writable derived memo, so a
+  // generic `T` needs the cast to select the plain-value overload.
+  const [uncontrolledValue, setUncontrolledValue] = createSignal<T | undefined>(
+    runIfFn(props.defaultValue) as Exclude<T | undefined, Function>,
+  )
   const controlled = createMemo(() => props.value?.() !== undefined)
 
   const currentValue = createMemo(() => (controlled() ? props.value?.() : uncontrolledValue()))

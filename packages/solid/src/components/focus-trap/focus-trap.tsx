@@ -39,12 +39,15 @@ export const FocusTrap = (props: FocusTrapProps) => {
     'persistentElements',
   ])
 
-  createEffect(() => {
-    if (!localNode || trapProps.disabled) return
-    const autoFocusNode = localNode.querySelector<HTMLElement>('[autofocus], [data-autofocus]')
-    trapProps.initialFocus ||= autoFocusNode ?? undefined
-    onCleanup(trapFocus(localNode, trapProps))
-  })
+  createEffect(
+    () => trapProps.disabled,
+    (disabled) => {
+      if (!localNode || disabled) return
+      const autoFocusNode = localNode.querySelector<HTMLElement>('[autofocus], [data-autofocus]')
+      trapProps.initialFocus ||= autoFocusNode ?? undefined
+      return trapFocus(localNode, trapProps)
+    },
+  )
 
   return <ark.div {...localProps} ref={composeRefs((el) => (localNode = el), props.ref)} />
 }

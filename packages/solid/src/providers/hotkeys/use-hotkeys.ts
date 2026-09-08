@@ -70,10 +70,9 @@ export const useHotkeys = (props: MaybeAccessor<UseHotkeysProps>) => {
   // Resolved on every event so the action and enabled state are never a render behind.
   const findCommand = (id: string) => untrack(latest).find((item, index) => resolveId(item, index) === id)
 
-  createEffect(() => {
-    const current = latest()
-    const resolvedPlatform = platform()
-
+  createEffect(
+    () => ({ current: latest(), resolvedPlatform: platform() }),
+    ({ current, resolvedPlatform }) => {
     const nextIds = new Set(current.map(resolveId))
 
     for (const id of [...registered.keys()]) {
@@ -106,7 +105,8 @@ export const useHotkeys = (props: MaybeAccessor<UseHotkeysProps>) => {
 
       registered.set(id, next)
     })
-  })
+    },
+  )
 
   onCleanup(() => {
     for (const id of registered.keys()) store.unregister(id)

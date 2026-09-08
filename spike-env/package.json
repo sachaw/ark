@@ -4,6 +4,7 @@
   "type": "module",
   "dependencies": {
     "@solid-primitives/keyed": "next",
+    "@solid-primitives/utils": "^7.0.0-next.4",
     "@solidjs/web": "2.0.0-rc.6",
     "@zag-js/anatomy": "latest",
     "@zag-js/collapsible": "latest",

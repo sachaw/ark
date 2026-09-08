@@ -34,12 +34,18 @@ export const useCollapsible = (props: MaybeAccessor<UseCollapsibleProps> = {}): 
   const service = useMachine(collapsible.machine, machineProps)
   const [wasVisible, setWasVisible] = createSignal(false)
 
-  createEffect(() => {
-    const isPresent = api().visible
-    if (isPresent) setWasVisible(true)
-  })
-
   const api = createMemo(() => collapsible.connect(service, normalizeProps))
+
+  // Must come AFTER `api`: 2.0's two-arg createEffect runs its *compute* phase
+  // eagerly to establish dependencies, so referencing a `const` declared later
+  // in the body is a TDZ error. Under 1.x the single-arg body was deferred, so
+  // the original order was safe.
+  createEffect(
+    () => api().visible,
+    (isPresent) => {
+      if (isPresent) setWasVisible(true)
+    },
+  )
 
   return createMemo(() => ({
     ...api(),

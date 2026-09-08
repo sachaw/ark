@@ -2,8 +2,25 @@ import { createNormalizer } from "@zag-js/types"
 import { isNumber, isObject, isString } from "@zag-js/utils"
 import type { JSX } from "@solidjs/web"
 
-export type PropTypes = JSX.IntrinsicElements & {
-  element: JSX.HTMLAttributes<any>
+/**
+ * 2.0 widened every JSX attribute to `T | RemoveAttribute` (`undefined | false`).
+ * zag's own machine props and ark's prop interfaces both declare the narrow
+ * form, so the props this normalizer emits must be narrowed to match or every
+ * spread into an ark component mismatches on `id` / `aria-*`. Only strip the
+ * sentinel where it is an addition — attributes that genuinely admit `boolean`
+ * keep `false` as a real value.
+ */
+// `BooleanAttribute` is `boolean | ""` (the HTML empty-string form), so a
+// boolean-valued attribute also picks up `""` that zag's props don't have.
+// Strip whichever sentinel this attribute gained: `""` for boolean-valued
+// attributes, `false` for everything else.
+type NarrowAttr<V> = boolean extends V ? Exclude<V, ''> : Exclude<V, false>
+type Narrow<T> = { [K in keyof T]: NarrowAttr<T[K]> }
+
+export type PropTypes = {
+  [E in keyof JSX.IntrinsicElements]: Narrow<JSX.IntrinsicElements[E]>
+} & {
+  element: Narrow<JSX.HTMLAttributes<any>>
   style: JSX.CSSProperties
 }
 
