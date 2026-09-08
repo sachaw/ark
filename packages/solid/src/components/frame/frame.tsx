@@ -1,6 +1,7 @@
-import type { JSX } from 'solid-js'
-import { Show, createEffect, createMemo, createSignal, onCleanup, splitProps } from 'solid-js'
-import { Portal } from 'solid-js/web'
+import { splitProps } from '../../utils/split-props.ts'
+import type { JSX } from '@solidjs/web'
+import { Show, createEffect, createMemo, createSignal, onCleanup } from 'solid-js'
+import { Portal } from '@solidjs/web'
 import { EnvironmentProvider } from '../../providers/index.tsx'
 import type { Assign } from '../../types.ts'
 import { composeRefs } from '../../utils/compose-refs.ts'
@@ -11,7 +12,7 @@ export interface FrameBaseProps {
   /** Additional content to be inserted into the frame's <head> */
   head?: JSX.Element
   /** Callback function to be executed when the frame is mounted */
-  onMount?: () => void
+  onSettled?: () => void
   /** Callback function to be executed when the frame is unmounted */
   onUnmount?: () => void
 }
@@ -29,7 +30,7 @@ function getMountNode(frame: HTMLIFrameElement) {
 }
 
 export const Frame = (props: FrameProps) => {
-  const [frameProps, localProps] = splitProps(props, ['children', 'head', 'onMount', 'onUnmount', 'srcdoc'])
+  const [frameProps, localProps] = splitProps(props, ['children', 'head', 'onSettled', 'onUnmount', 'srcdoc'])
 
   const srcdoc = createMemo(() => frameProps.srcdoc ?? initialSrcDoc)
 
@@ -87,7 +88,7 @@ export const Frame = (props: FrameProps) => {
         <Show when={mountNode()}>
           {(node) => (
             <Portal mount={node()}>
-              <FrameContent onMount={frameProps.onMount} onUnmount={frameProps.onUnmount}>
+              <FrameContent onSettled={frameProps.onSettled} onUnmount={frameProps.onUnmount}>
                 {frameProps.children}
               </FrameContent>
             </Portal>

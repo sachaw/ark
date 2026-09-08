@@ -1,4 +1,4 @@
-import type { JSX } from 'solid-js'
+import type { JSX } from '@solidjs/web'
 import { parts } from './field.anatomy.ts'
 import { FieldProvider, useFieldContext, type UseFieldContext } from './use-field-context.ts'
 

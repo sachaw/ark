@@ -1,5 +1,6 @@
+import { splitProps } from '../../utils/split-props.ts'
 import { Selection, type SelectionMode } from '@zag-js/collection'
-import { createEffect, createMemo, createSignal, on, splitProps } from 'solid-js'
+import { createEffect, createMemo, createSignal, on } from 'solid-js'
 import type { MaybeAccessor } from '../../types.ts'
 import type { CollectionItem, ListCollection } from './list-collection.ts'
 

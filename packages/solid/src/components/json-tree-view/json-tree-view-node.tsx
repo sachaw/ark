@@ -5,8 +5,9 @@ import {
   jsonNodeToElement,
   keyPathToKey,
 } from '@zag-js/json-tree-utils'
-import { type JSX, createMemo } from 'solid-js'
-import { Index, Show } from 'solid-js/web'
+import { createMemo } from 'solid-js'
+import type { JSX } from '@solidjs/web'
+import { Index, Show } from '@solidjs/web'
 import { TreeView, useTreeViewContext } from '../tree-view/index.tsx'
 import { JsonTreeViewKeyNode } from './json-tree-view-key-node.tsx'
 import { useJsonTreeViewPropsContext } from './json-tree-view-props-context.ts'

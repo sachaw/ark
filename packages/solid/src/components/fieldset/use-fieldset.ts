@@ -1,4 +1,4 @@
-import { createMemo, createSignal, createUniqueId, mergeProps, onCleanup, onMount } from 'solid-js'
+import { createMemo, createSignal, createUniqueId, merge, onCleanup, onSettled } from 'solid-js'
 import { useEnvironmentContext } from '../../providers/index.tsx'
 import { dataAttr } from '../../utils/attr.ts'
 import type { MaybeAccessor } from '../../types.ts'
@@ -25,7 +25,7 @@ export type UseFieldsetReturn = ReturnType<typeof useFieldset>
 export const useFieldset = (props?: MaybeAccessor<UseFieldsetProps>) => {
   const env = useEnvironmentContext()
 
-  const mergedProps = mergeProps({ disabled: false, invalid: false }, runIfFn(props))
+  const mergedProps = merge({ disabled: false, invalid: false }, runIfFn(props))
 
   const [rootRef, setRootRef] = createSignal<HTMLFieldSetElement | undefined>(undefined)
   const id = mergedProps.id ?? createUniqueId()
@@ -37,7 +37,7 @@ export const useFieldset = (props?: MaybeAccessor<UseFieldsetProps>) => {
   const [hasErrorText, setHasErrorText] = createSignal(false)
   const [hasHelperText, setHasHelperText] = createSignal(false)
 
-  onMount(() => {
+  onSettled(() => {
     const rootNode = rootRef()
     if (!rootNode) return
 

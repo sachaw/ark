@@ -1,4 +1,4 @@
-import { createMemo, createSignal, createUniqueId, mergeProps, onCleanup, onMount } from 'solid-js'
+import { createMemo, createSignal, createUniqueId, merge, onCleanup, onSettled } from 'solid-js'
 import { useEnvironmentContext } from '../../providers/index.tsx'
 import { ariaAttr, dataAttr } from '../../utils/attr.ts'
 import type { MaybeAccessor } from '../../types.ts'
@@ -51,7 +51,7 @@ export const useField = (props?: MaybeAccessor<UseFieldProps>) => {
   const fieldset: UseFieldsetReturn | undefined = useFieldsetContext()
   const env = useEnvironmentContext()
 
-  const fieldProps = mergeProps(
+  const fieldProps = merge(
     { disabled: Boolean(fieldset?.().disabled), required: false, invalid: false, readOnly: false },
     props,
   )
@@ -67,7 +67,7 @@ export const useField = (props?: MaybeAccessor<UseFieldProps>) => {
   const helperTextId = fieldProps.ids?.helperText ?? `field::${id}::helper-text`
   const labelId = fieldProps.ids?.label ?? `field::${id}::label`
 
-  onMount(() => {
+  onSettled(() => {
     const rootNode = rootRef()
     if (!rootNode) return
 

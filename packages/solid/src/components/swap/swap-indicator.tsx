@@ -1,5 +1,6 @@
+import { splitProps } from '../../utils/split-props.ts'
 import { mergeProps } from '@zag-js/solid'
-import { Show, splitProps } from 'solid-js'
+import { Show } from 'solid-js'
 import { composeRefs } from '../../utils/compose-refs.ts'
 import { type HTMLProps, type PolymorphicProps, ark } from '../factory.tsx'
 import { useSwapContext } from './use-swap-context.ts'

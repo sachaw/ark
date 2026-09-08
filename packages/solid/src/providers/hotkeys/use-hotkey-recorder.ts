@@ -1,6 +1,6 @@
 import { type HotkeyRecorderOptions, type HotkeyRecorderState, createHotkeyRecorder } from '@zag-js/hotkeys'
 import { useSyncExternalStore } from '@zag-js/solid'
-import { type Accessor, onCleanup, onMount } from 'solid-js'
+import { type Accessor, onCleanup, onSettled } from 'solid-js'
 import type { MaybeAccessor } from '../../types.ts'
 import { runIfFn } from '../../utils/run-if-fn.ts'
 import { useEnvironmentContext } from '../environment/use-environment-context.ts'
@@ -34,7 +34,7 @@ export const useHotkeyRecorder = (props: MaybeAccessor<UseHotkeyRecorderProps> =
   const env = useEnvironmentContext()
   const recorder = createHotkeyRecorder()
 
-  onMount(() => {
+  onSettled(() => {
     const options = runIfFn(props)
 
     recorder.init(env().getRootNode() as Document)

@@ -1,7 +1,7 @@
 import type { ContentProps } from '@zag-js/navigation-menu'
 import { mergeProps } from '@zag-js/solid'
 import { createMemo, Show } from 'solid-js'
-import { Portal } from 'solid-js/web'
+import { Portal } from '@solidjs/web'
 import type { Assign } from '../../types.ts'
 import { composeRefs } from '../../utils/compose-refs.ts'
 import { createSplitProps } from '../../utils/create-split-props.ts'
