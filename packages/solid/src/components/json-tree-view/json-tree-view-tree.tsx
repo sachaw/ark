@@ -1,4 +1,4 @@
-import { Index } from 'solid-js'
+import { For } from 'solid-js'
 import type { JSX } from '@solidjs/web'
 import { createSplitProps } from '../../utils/create-split-props.ts'
 import { TreeView, useTreeViewContext } from '../tree-view/index.tsx'
@@ -18,9 +18,9 @@ export const JsonTreeViewTree = (props: JsonTreeViewTreeProps): JSX.Element => {
 
   return (
     <TreeView.Tree data-scope="json-tree-view" {...treeProps}>
-      <Index each={children()}>
+      <For each={children()} keyed={false}>
         {(child, index) => <JsonTreeViewNode node={child()} indexPath={[index]} {...nodeProps} />}
-      </Index>
+      </For>
     </TreeView.Tree>
   )
 }

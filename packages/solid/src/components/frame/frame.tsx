@@ -5,19 +5,19 @@ import { Portal } from '@solidjs/web'
 import { EnvironmentProvider } from '../../providers/index.tsx'
 import type { Assign } from '../../types.ts'
 import { composeRefs } from '../../utils/compose-refs.ts'
-import { ark } from '../factory.tsx'
+import { type HTMLProps, ark } from '../factory.tsx'
 import { FrameContent } from './frame-content.tsx'
 
 export interface FrameBaseProps {
   /** Additional content to be inserted into the frame's <head> */
   head?: JSX.Element
   /** Callback function to be executed when the frame is mounted */
-  onSettled?: () => void
+  onMount?: () => void
   /** Callback function to be executed when the frame is unmounted */
   onUnmount?: () => void
 }
 
-export interface FrameProps extends Assign<JSX.IframeHTMLAttributes<HTMLIFrameElement>, FrameBaseProps> {}
+export interface FrameProps extends Assign<HTMLProps<'iframe'>, FrameBaseProps> {}
 
 const resetStyle = '<style>*,*::before,*::after { margin: 0; padding: 0; box-sizing: border-box; }</style>'
 
@@ -30,29 +30,32 @@ function getMountNode(frame: HTMLIFrameElement) {
 }
 
 export const Frame = (props: FrameProps) => {
-  const [frameProps, localProps] = splitProps(props, ['children', 'head', 'onSettled', 'onUnmount', 'srcdoc'])
+  const [frameProps, localProps] = splitProps(props, ['children', 'head', 'onMount', 'onUnmount', 'srcdoc'])
 
   const srcdoc = createMemo(() => frameProps.srcdoc ?? initialSrcDoc)
 
   const [frameRef, setFrameRef] = createSignal<HTMLIFrameElement | null>(null)
   const [mountNode, setMountNode] = createSignal<HTMLElement | null>(null)
 
-  createEffect(() => {
-    const frame = frameRef()
-    if (!frame) return
+  createEffect(
+    () => ({ frame: frameRef(), html: srcdoc() }),
+    ({ frame, html }) => {
+      if (!frame) return
 
-    const doc = frame.contentWindow?.document
-    if (!doc) return
+      const doc = frame.contentWindow?.document
+      if (!doc) return
 
-    doc.open()
-    doc.write(srcdoc())
-    doc.close()
+      doc.open()
+      doc.write(String(html ?? ''))
+      doc.close()
 
-    setMountNode(getMountNode(frame))
-  })
+      setMountNode(getMountNode(frame))
+    },
+  )
 
-  createEffect(() => {
-    const frame = frameRef()
+  createEffect(
+    () => frameRef(),
+    (frame) => {
     if (!frame?.contentDocument) return
 
     const win = frame.contentWindow as Window & typeof globalThis
@@ -77,10 +80,11 @@ export const Frame = (props: FrameProps) => {
       resizeObserver.observe(node)
     }
 
-    onCleanup(() => {
+    return () => {
       resizeObserver.disconnect()
-    })
-  })
+    }
+    },
+  )
 
   return (
     <EnvironmentProvider value={() => frameRef()?.contentDocument ?? document}>
@@ -88,7 +92,7 @@ export const Frame = (props: FrameProps) => {
         <Show when={mountNode()}>
           {(node) => (
             <Portal mount={node()}>
-              <FrameContent onSettled={frameProps.onSettled} onUnmount={frameProps.onUnmount}>
+              <FrameContent onMount={frameProps.onMount} onUnmount={frameProps.onUnmount}>
                 {frameProps.children}
               </FrameContent>
             </Portal>

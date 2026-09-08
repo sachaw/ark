@@ -22,11 +22,14 @@ export const MenuRootProvider = (props: MenuRootProviderProps) => {
   const [presenceProps, menuProps] = splitPresenceProps(props)
   const presenceApi = usePresence(mergeProps(presenceProps, () => ({ present: menuProps.value.api().open })))
 
-  createEffect(() => {
-    if (!parentMachine) return
-    parentApi?.().setChild(menuProps.value.service)
-    menuProps.value.api().setParent(parentMachine)
-  })
+  createEffect(
+    () => parentApi?.(),
+    (api) => {
+      if (!parentMachine) return
+      api?.setChild(menuProps.value.service)
+      menuProps.value.api().setParent(parentMachine)
+    },
+  )
 
   const triggerItemContext = () => parentApi?.().getTriggerItemProps(menuProps.value.api())
 

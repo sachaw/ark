@@ -1,3 +1,4 @@
+import { createMemo } from 'solid-js'
 import type { JSX } from '@solidjs/web'
 import { parts } from './field.anatomy.ts'
 import { FieldProvider, useFieldContext, type UseFieldContext } from './use-field-context.ts'
@@ -13,7 +14,10 @@ export interface FieldItemProps extends FieldItemBaseProps {
 export const FieldItem = (props: FieldItemProps) => {
   const parentField = useFieldContext()
 
-  const itemField: UseFieldContext = () => {
+  // 2.0: `createMemo` returns a branded `SourceAccessor`, so a plain arrow
+  // function no longer satisfies `UseFieldContext` (= ReturnType of a memo).
+  // This is derived state anyway, so a memo is the correct shape.
+  const itemField: UseFieldContext = createMemo(() => {
     const parent = parentField?.()
     if (!parent) {
       throw new Error('Field.Item must be used within Field.Root')
@@ -52,7 +56,7 @@ export const FieldItem = (props: FieldItemProps) => {
         ...parts.textarea.attrs,
       }),
     }
-  }
+  })
 
   return <FieldProvider value={itemField}>{props.children}</FieldProvider>
 }

@@ -1,7 +1,12 @@
 import type { DrawerStack } from '@zag-js/drawer'
-import { createContext as createSolidContext, useContext } from 'solid-js'
+import { createContext } from '../../utils/create-context.ts'
 
-const DrawerStackStoreContext = createSolidContext<DrawerStack>()
-
-export const DrawerStackStoreProvider = DrawerStackStoreContext.Provider
-export const useDrawerStackStore = () => useContext(DrawerStackStoreContext)
+// 2.0: a raw `createContext<T>()` with no default THROWS `ContextNotFoundError`
+// when read outside a provider, but `useDrawer` reads this unconditionally and
+// a standalone Drawer has no stack. Route it through ark's own helper with
+// `strict: false`, which parks a sentinel default and hands back `undefined`.
+export const [DrawerStackStoreProvider, useDrawerStackStore] = createContext<DrawerStack>({
+  hookName: 'useDrawerStackStore',
+  providerName: '<DrawerStackStoreProvider />',
+  strict: false,
+})

@@ -7,7 +7,7 @@ import {
 } from '@zag-js/json-tree-utils'
 import { createMemo } from 'solid-js'
 import type { JSX } from '@solidjs/web'
-import { Index, Show } from '@solidjs/web'
+import { For, Show } from '@solidjs/web'
 import { TreeView, useTreeViewContext } from '../tree-view/index.tsx'
 import { JsonTreeViewKeyNode } from './json-tree-view-key-node.tsx'
 import { useJsonTreeViewPropsContext } from './json-tree-view-props-context.ts'
@@ -91,9 +91,9 @@ export function JsonTreeViewNode(props: JsonTreeViewNodeProps): JSX.Element {
             <Show when={typeof props.indentGuide === 'boolean'} fallback={props.indentGuide}>
               <TreeView.BranchIndentGuide />
             </Show>
-            <Index each={props.node.children}>
+            <For each={props.node.children} keyed={false}>
               {(child, index) => <JsonTreeViewNode {...props} node={child()} indexPath={[...props.indexPath, index]} />}
-            </Index>
+            </For>
           </TreeView.BranchContent>
         </TreeView.Branch>
       </Show>

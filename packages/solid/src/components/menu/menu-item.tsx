@@ -30,10 +30,13 @@ export const MenuItem = (props: MenuItemProps) => {
   const mergedProps = mergeProps(() => context().getItemProps(itemProps), localProps)
   const itemState = createMemo(() => context().getItemState(itemProps))
 
-  createEffect(() => {
-    const cleanup = context().addItemListener({ id: itemState().id, onSelect: itemProps.onSelect })
-    onCleanup(() => cleanup?.())
-  })
+  createEffect(
+    () => ({ ctx: context(), id: itemState().id, onSelect: itemProps.onSelect }),
+    ({ ctx, id, onSelect }) => {
+      const cleanup = ctx.addItemListener({ id, onSelect })
+      return () => cleanup?.()
+    },
+  )
 
   return (
     <MenuItemPropsProvider value={itemProps}>

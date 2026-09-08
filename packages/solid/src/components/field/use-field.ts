@@ -53,7 +53,12 @@ export const useField = (props?: MaybeAccessor<UseFieldProps>) => {
 
   const fieldProps = merge(
     { disabled: Boolean(fieldset?.().disabled), required: false, invalid: false, readOnly: false },
-    props,
+    // `merge` resolves function sources at runtime (it wraps them in a memo, so
+    // the accessor stays reactive), but the `Merge<T>` *type* doesn't model
+    // that — leaving the accessor arm in the type poisons every downstream
+    // `fieldProps.x` read. Cast the argument, not the result: runtime still
+    // receives the accessor.
+    props as UseFieldProps,
   )
 
   const [hasErrorText, setHasErrorText] = createSignal(false)
@@ -150,7 +155,10 @@ export const useField = (props?: MaybeAccessor<UseFieldProps>) => {
   })
 
   const getRequiredIndicatorProps = () => ({
-    'aria-hidden': true,
+    // 2.0 narrowed the enumerated aria attributes to `"true" | "false"` strings
+    // (`false`/`undefined` now mean "remove the attribute"), so a real boolean
+    // is no longer accepted here.
+    'aria-hidden': 'true' as const,
     ...parts.requiredIndicator.attrs,
   })
 

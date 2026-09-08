@@ -1,21 +1,22 @@
-import { createEffect, onCleanup } from 'solid-js'
+import { onSettled } from 'solid-js'
 import type { JSX } from '@solidjs/web'
 
 interface FrameContentProps {
-  onSettled?(): void
+  onMount?(): void
   onUnmount?(): void
   children?: JSX.Element
 }
 
 export const FrameContent = (props: FrameContentProps) => {
-  const { onSettled, onUnmount, children } = props
+  const { onMount, onUnmount, children } = props
 
-  createEffect(() => {
-    onSettled?.()
-
-    onCleanup(() => {
+  // No reactive dependency — this is pure setup/teardown, which is exactly
+  // what onSettled is for in 2.0.
+  onSettled(() => {
+    onMount?.()
+    return () => {
       onUnmount?.()
-    })
+    }
   })
 
   return children

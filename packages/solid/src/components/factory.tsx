@@ -18,17 +18,32 @@ export type PolymorphicProps<T extends ElementType> = {
    */
   asChild?: (props: ParentProps<T>) => JSX.Element
 }
-export type HTMLProps<E extends ElementType> = JSX.IntrinsicElements[E]
+/**
+ * 2.0 widened every JSX attribute to `T | RemoveAttribute` (`undefined | false`)
+ * so a binding can express attribute removal. Ark's prop interfaces `extends`
+ * both this and zag's machine props, and interface extension demands the shared
+ * members be *identical* — but zag declares the narrow `id?: string`. Result:
+ * every component root failed to extend both (TS2320) and to forward its props
+ * into its machine (TS2345).
+ *
+ * Strip the removal sentinel, but only where it is genuinely an addition: if the
+ * attribute already admits `boolean` then `false` is a real value and must stay
+ * (dropping it turns `disabled?: boolean` into `true`). JSX call sites are
+ * unaffected — they still accept `false`/`undefined` via the element's own type.
+ */
+// `BooleanAttribute` is `boolean | ""` (the HTML empty-string form), so a
+// boolean-valued attribute also picks up `""` that zag's props don't have.
+// Strip whichever sentinel this attribute gained: `""` for boolean-valued
+// attributes, `false` for everything else.
+type NarrowAttr<V> = boolean extends V ? Exclude<V, ''> : Exclude<V, false>
+
+export type HTMLProps<E extends ElementType> = {
+  [K in keyof JSX.IntrinsicElements[E]]: NarrowAttr<JSX.IntrinsicElements[E][K]>
+}
+
 // 2.0: `ComponentProps` is gone; the intrinsic-element map is the direct
 // equivalent for the element names this factory is keyed on.
-//
-// NOTE: 2.0 also widened every attribute to `T | RemoveAttribute`
-// (`undefined | false`), which no longer matches ark's / zag's narrow
-// `id?: string`. That is the remaining ~108-error class and it is NOT a
-// one-line narrowing: stripping `false` wholesale also destroys genuine
-// boolean attributes (`disabled?: boolean` -> `true`), which made it worse
-// (155 -> 644 errors). Needs a per-attribute-aware fix.
-export type HTMLArkProps<E extends ElementType> = Assign<JSX.IntrinsicElements[E], PolymorphicProps<E>>
+export type HTMLArkProps<E extends ElementType> = Assign<HTMLProps<E>, PolymorphicProps<E>>
 
 type ArkComponent<E extends ElementType> = (props: HTMLArkProps<E>) => JSX.Element
 
