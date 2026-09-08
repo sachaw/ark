@@ -55,6 +55,17 @@ export const normalizeProps = createNormalizer<PropTypes>((props: Dict) => {
       continue
     }
 
+    // 2.0 treats a boolean attribute value as presence/absence, so
+    // `aria-hidden={true}` renders as `aria-hidden=""` — which the
+    // accessibility tree does NOT read as hidden. ARIA attributes are always
+    // strings; 2.0's own types now say so (`"true" | "false"`), and zag's
+    // machines still emit real booleans. Stringify them here, in the adapter,
+    // rather than patching every machine.
+    if (key.startsWith("aria-") && typeof value === "boolean") {
+      normalized[key] = value ? "true" : "false"
+      continue
+    }
+
     if (key === "style" && isObject(value)) {
       normalized["style"] = cssify(value)
       continue

@@ -1,4 +1,4 @@
-import { createMemo, createSignal, createUniqueId, merge, onCleanup, onSettled } from 'solid-js'
+import { createMemo, createSignal, createUniqueId, merge, onSettled } from 'solid-js'
 import { useEnvironmentContext } from '../../providers/index.tsx'
 import { ariaAttr, dataAttr } from '../../utils/attr.ts'
 import type { MaybeAccessor } from '../../types.ts'
@@ -88,7 +88,7 @@ export const useField = (props?: MaybeAccessor<UseFieldProps>) => {
     const observer = new win.MutationObserver(checkTextElements)
     observer.observe(rootNode, { childList: true, subtree: true })
 
-    onCleanup(() => observer.disconnect())
+    return () => observer.disconnect()
   })
 
   const getRootProps = () => ({
@@ -109,7 +109,7 @@ export const useField = (props?: MaybeAccessor<UseFieldProps>) => {
     'data-invalid': dataAttr(fieldProps.invalid),
     'data-readonly': dataAttr(fieldProps.readOnly),
     'data-required': dataAttr(fieldProps.required),
-    htmlFor: targetControlId ?? id,
+    for: targetControlId ?? id,
   })
 
   const errorMessageId = createMemo(() => (hasErrorText() && fieldProps.invalid ? errorTextId : undefined))

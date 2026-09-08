@@ -1,5 +1,5 @@
 import { Tour, useTour } from '@ark-ui/solid/tour'
-import { Portal } from 'solid-js/web'
+import { Portal } from '@solidjs/web'
 import { MoreHorizontalIcon, SaveIcon, SparklesIcon, UploadIcon, XIcon } from 'lucide-solid'
 import { For } from 'solid-js'
 import button from 'styles/button.module.css'

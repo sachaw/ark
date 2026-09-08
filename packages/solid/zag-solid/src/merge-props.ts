@@ -1,4 +1,5 @@
 import { mergeProps as zagMergeProps } from "@zag-js/core"
+import { untrack } from "solid-js"
 
 export type MaybeAccessor<T> = T | (() => T)
 
@@ -19,7 +20,15 @@ export function mergeProps(...sources: any[]) {
   const target = {}
   for (let i = 0; i < sources.length; i++) {
     let source = sources[i]
-    if (typeof source === "function") source = source()
+    // Resolve accessor sources UNTRACKED. This runs during the component
+    // body, which under Solid 2 executes inside the parent's `insert` compute
+    // — a tracking scope. Reading the accessor here therefore subscribed the
+    // PARENT's insert to the child's state, so any child-state change re-ran
+    // the parent's children getter and re-created the whole subtree (element
+    // identity lost => dropped focus, restarted animations, stale test refs).
+    // Only the key set is needed here; the per-key getters below still resolve
+    // sources reactively inside the consumer's own effect.
+    if (typeof source === "function") source = untrack(source)
     if (source) {
       const descriptors = Object.getOwnPropertyDescriptors(source)
       for (const key in descriptors) {

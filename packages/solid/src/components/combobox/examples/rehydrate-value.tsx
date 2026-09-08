@@ -1,6 +1,6 @@
 import { Combobox, useCombobox, useComboboxContext, useListCollection } from '@ark-ui/solid/combobox'
 import { For, createEffect, createRenderEffect, createSignal, on } from 'solid-js'
-import { Portal } from 'solid-js/web'
+import { Portal } from '@solidjs/web'
 import styles from 'styles/combobox.module.css'
 import { useAsync } from './use-async.ts'
 

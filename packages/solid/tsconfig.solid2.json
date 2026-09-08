@@ -25,6 +25,7 @@
     "src/**/tests/**",
     "src/**/*.test.*",
     "src/**/*.stories.*",
-    "src/setup-test.ts"
+    "src/setup-test.ts",
+    "src/setup-test.solid2.ts"
   ]
 }
