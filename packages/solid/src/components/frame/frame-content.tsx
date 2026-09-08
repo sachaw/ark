@@ -1,16 +1,17 @@
-import { type JSX, createEffect, onCleanup } from 'solid-js'
+import { createEffect, onCleanup } from 'solid-js'
+import type { JSX } from '@solidjs/web'
 
 interface FrameContentProps {
-  onMount?(): void
+  onSettled?(): void
   onUnmount?(): void
   children?: JSX.Element
 }
 
 export const FrameContent = (props: FrameContentProps) => {
-  const { onMount, onUnmount, children } = props
+  const { onSettled, onUnmount, children } = props
 
   createEffect(() => {
-    onMount?.()
+    onSettled?.()
 
     onCleanup(() => {
       onUnmount?.()

@@ -1,0 +1,20 @@
+{
+  "name": "ark-solid2-spike",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@solid-primitives/keyed": "next",
+    "@solidjs/web": "2.0.0-rc.6",
+    "@zag-js/anatomy": "latest",
+    "@zag-js/collapsible": "latest",
+    "@zag-js/collection": "latest",
+    "@zag-js/core": "latest",
+    "@zag-js/dom-query": "latest",
+    "@zag-js/select": "latest",
+    "@zag-js/types": "latest",
+    "@zag-js/utils": "latest",
+    "happy-dom": "^20.14.0",
+    "solid-js": "2.0.0-rc.6",
+    "typescript": "latest"
+  }
+}

@@ -1,5 +1,6 @@
 import { mergeProps } from '@zag-js/solid'
-import { type JSX, createEffect } from 'solid-js'
+import { createEffect } from 'solid-js'
+import type { JSX } from '@solidjs/web'
 import { PresenceProvider, type UsePresenceProps, splitPresenceProps, usePresence } from '../presence/index.tsx'
 import type { UseMenuReturn } from './use-menu.ts'
 import { MenuProvider, useMenuContext } from './use-menu-context.ts'

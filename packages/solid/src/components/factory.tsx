@@ -1,7 +1,8 @@
 import { mergeProps } from '@zag-js/solid'
 import { warn } from '@zag-js/utils'
-import { type Accessor, type ComponentProps, type JSX, splitProps } from 'solid-js'
-import { Dynamic } from 'solid-js/web'
+import { type Accessor, omit } from 'solid-js'
+import type { JSX } from '@solidjs/web'
+import { dynamic } from '@solidjs/web'
 import type { Assign } from '../types.ts'
 
 type ElementType = keyof JSX.IntrinsicElements
@@ -38,8 +39,32 @@ export type PolymorphicProps<T extends ElementType, State = EmptyState> = {
    */
   render?: RenderFn<T, State>
 }
-export type HTMLProps<E extends ElementType> = JSX.IntrinsicElements[E]
-export type HTMLArkProps<E extends ElementType> = Assign<ComponentProps<E>, PolymorphicProps<E>>
+/**
+ * 2.0 widened every JSX attribute to `T | RemoveAttribute` (`undefined | false`)
+ * so a binding can express attribute removal. Ark's prop interfaces `extends`
+ * both this and zag's machine props, and interface extension demands the shared
+ * members be *identical* — but zag declares the narrow `id?: string`. Result:
+ * every component root failed to extend both (TS2320) and to forward its props
+ * into its machine (TS2345).
+ *
+ * Strip the removal sentinel, but only where it is genuinely an addition: if the
+ * attribute already admits `boolean` then `false` is a real value and must stay
+ * (dropping it turns `disabled?: boolean` into `true`). JSX call sites are
+ * unaffected — they still accept `false`/`undefined` via the element's own type.
+ */
+// `BooleanAttribute` is `boolean | ""` (the HTML empty-string form), so a
+// boolean-valued attribute also picks up `""` that zag's props don't have.
+// Strip whichever sentinel this attribute gained: `""` for boolean-valued
+// attributes, `false` for everything else.
+type NarrowAttr<V> = boolean extends V ? Exclude<V, ''> : Exclude<V, false>
+
+export type HTMLProps<E extends ElementType> = {
+  [K in keyof JSX.IntrinsicElements[E]]: NarrowAttr<JSX.IntrinsicElements[E][K]>
+}
+
+// 2.0: `ComponentProps` is gone; the intrinsic-element map is the direct
+// equivalent for the element names this factory is keyed on.
+export type HTMLArkProps<E extends ElementType> = Assign<HTMLProps<E>, PolymorphicProps<E>>
 
 /**
  * The state of the part, forwarded to the `render` function. Set by the component, not the consumer.
@@ -56,34 +81,42 @@ interface FactoryProps extends Record<string, any> {
 
 // `any` for the state so a render fn can declare the shape its part provides
 type ArkComponent<E extends ElementType> = (
-  props: Assign<ComponentProps<E>, PolymorphicProps<E, any>> & StateProp,
+  props: Assign<HTMLProps<E>, PolymorphicProps<E, any>> & StateProp,
 ) => JSX.Element
 
 const EMPTY_STATE: EmptyState = Object.freeze({})
 
 const withRender = <T extends ElementType>(Component: T) => {
+  // 2.0 has two dynamic forms and the difference is load-bearing here: the
+  // `<Dynamic component={...}>` JSX wrapper RE-CREATES its host element when
+  // props change, while the `dynamic()` factory keeps a stable component
+  // identity and patches in place. Re-creation detaches the node, so anything
+  // holding a reference loses it — focus is dropped, animations restart, and
+  // every `getByRole(...)`-then-assert test fails against a stale node.
+  //
+  // `withRender` is memoised per element name by `jsxFactory`, so this runs
+  // once per tag.
+  const Rendered = dynamic(() => Component)
+
   const ArkComponent: ArkComponent<T> = (props) => {
-    const [localProps, parentProps] = splitProps(props as FactoryProps, ['asChild', 'render', 'state'])
+    const localProps = props as FactoryProps
+    const parentProps = omit(localProps, 'asChild', 'render', 'state')
 
     warn(
       Boolean(localProps.asChild) && Boolean(localProps.render),
       '[ark-ui] `asChild` and `render` cannot be used together. Prefer `render`.',
     )
 
-    // the caller applies the props itself, so only the ref is left to us
-    const [, restProps] = splitProps(parentProps, ['ref'])
-    const propsFn = (userProps?: JSX.IntrinsicElements[T]) => mergeProps(restProps, userProps ?? {})
-
-    if (localProps.render) {
-      return localProps.render(propsFn, () => localProps.state ?? EMPTY_STATE)
-    }
-
-    if (localProps.asChild) {
-      return localProps.asChild(propsFn)
+    if (localProps.render || localProps.asChild) {
+      // the caller applies the props itself, so only the ref is left to us
+      const restProps = omit(parentProps, 'ref')
+      const propsFn = (userProps?: JSX.IntrinsicElements[T]) => mergeProps(restProps, userProps ?? {})
+      if (localProps.render) return localProps.render(propsFn, () => localProps.state ?? EMPTY_STATE)
+      return localProps.asChild!(propsFn)
     }
 
     // @ts-expect-error generic element props can't be expressed against Dynamic
-    return <Dynamic component={Component} {...parentProps} />
+    return <Rendered {...parentProps} />
   }
 
   return ArkComponent

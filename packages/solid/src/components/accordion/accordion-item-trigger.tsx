@@ -1,5 +1,6 @@
+import { splitProps } from '../../utils/split-props.ts'
 import { mergeProps } from '@zag-js/solid'
-import { splitProps } from 'solid-js'
+
 import { useCollapsibleContext } from '../collapsible/index.tsx'
 import { type HTMLProps, type PolymorphicProps, ark } from '../factory.tsx'
 import { useAccordionContext } from './use-accordion-context.ts'

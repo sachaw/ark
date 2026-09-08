@@ -1,5 +1,6 @@
+import { splitProps } from '../../utils/split-props.ts'
 import { mergeProps } from '@zag-js/solid'
-import { splitProps } from 'solid-js'
+
 import { type HTMLProps, type PolymorphicProps, ark } from '../factory.tsx'
 import { type UseSwapProps, useSwap } from './use-swap.ts'
 import { SwapProvider } from './use-swap-context.ts'

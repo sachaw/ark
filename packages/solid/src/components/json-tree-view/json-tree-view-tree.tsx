@@ -1,4 +1,5 @@
-import { Index, type JSX } from 'solid-js'
+import { Index } from 'solid-js'
+import type { JSX } from '@solidjs/web'
 import { createSplitProps } from '../../utils/create-split-props.ts'
 import { TreeView, useTreeViewContext } from '../tree-view/index.tsx'
 import { JsonTreeViewNode, type JsonTreeViewNodeBaseProps } from './json-tree-view-node.tsx'
