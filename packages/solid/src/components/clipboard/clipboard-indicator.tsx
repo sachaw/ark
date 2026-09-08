@@ -15,7 +15,12 @@ export interface ClipboardIndicatorProps extends HTMLProps<'div'>, ClipboardIndi
 export const ClipboardIndicator = (props: ClipboardIndicatorProps) => {
   const [indicatorProps, localProps] = createSplitProps<IndicatorProps>()(props, ['copied'])
   const api = useClipboardContext()
-  const mergedProps = mergeProps(api().getIndicatorProps({ copied: api().copied }), localProps)
+  // Lazy, like every other part — resolving inline reads the api in the
+  // component body, which 2.0 flags as a read that will not update.
+  const mergedProps = mergeProps(
+    () => api().getIndicatorProps({ copied: api().copied }),
+    localProps,
+  )
   const getChildren = children(() => localProps.children)
 
   return (
