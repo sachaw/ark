@@ -1,6 +1,5 @@
-import { splitProps } from '../../utils/split-props.ts'
 import { mergeProps } from '@zag-js/solid'
-import { Show } from 'solid-js'
+import { omit, Show } from 'solid-js'
 import type { JSX } from '@solidjs/web'
 import { type HTMLProps, type PolymorphicProps, ark } from '../factory.tsx'
 import { usePasswordInputContext } from './use-password-input-context.ts'
@@ -15,13 +14,13 @@ export interface PasswordInputIndicatorProps extends HTMLProps<'span'>, Password
 
 export const PasswordInputIndicator = (props: PasswordInputIndicatorProps) => {
   const passwordInput = usePasswordInputContext()
-  const [local, rest] = splitProps(props, ['fallback', 'children'])
+  const rest = omit(props, 'fallback', 'children')
   const mergedProps = mergeProps(() => passwordInput().getIndicatorProps(), rest)
 
   return (
     <ark.span {...mergedProps}>
-      <Show when={passwordInput().visible} fallback={local.fallback}>
-        {local.children}
+      <Show when={passwordInput().visible} fallback={props.fallback}>
+        {props.children}
       </Show>
     </ark.span>
   )

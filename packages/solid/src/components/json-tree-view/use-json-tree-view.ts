@@ -1,8 +1,7 @@
-import { splitProps } from '../../utils/split-props.ts'
 import type { PropTypes } from '@zag-js/solid'
 import type * as treeView from '@zag-js/tree-view'
 import { type JsonNode, getRootNode, nodeToString, nodeToValue } from '@zag-js/json-tree-utils'
-import { type Accessor, createMemo } from 'solid-js'
+import { type Accessor, createMemo, omit } from 'solid-js'
 import { untrack } from '@solidjs/web'
 import { createSplitProps } from '../../utils/create-split-props.ts'
 import { type UseTreeViewProps, createTreeCollection, useTreeView } from '../tree-view/index.tsx'
@@ -29,19 +28,19 @@ export const useJsonTreeView = (props: UseJsonTreeViewProps): UseJsonTreeViewRet
     'showNonenumerable',
   ])
 
-  const [jsonProps, restProps] = splitProps(localProps, ['data', 'defaultExpandedDepth'])
+  const restProps = omit(localProps, 'data', 'defaultExpandedDepth')
 
   const collection = createMemo(() => {
     return createTreeCollection<JsonNode>({
       nodeToValue,
       nodeToString,
-      rootNode: getRootNode(jsonProps.data),
+      rootNode: getRootNode(localProps.data),
     })
   })
 
   const defaultExpandedValue = createMemo(() => {
-    return jsonProps.defaultExpandedDepth != null
-      ? getBranchValues(collection(), jsonProps.defaultExpandedDepth)
+    return localProps.defaultExpandedDepth != null
+      ? getBranchValues(collection(), localProps.defaultExpandedDepth)
       : undefined
   })
 

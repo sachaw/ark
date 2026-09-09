@@ -1,4 +1,4 @@
-import { splitProps } from '../../utils/split-props.ts'
+import { omit } from 'solid-js'
 import { mergeProps } from '@zag-js/solid'
 
 import { type HTMLProps, type PolymorphicProps, ark } from '../factory.tsx'
@@ -10,7 +10,7 @@ export interface SwapRootBaseProps extends UseSwapProps, PolymorphicProps<'span'
 export interface SwapRootProps extends HTMLProps<'span'>, SwapRootBaseProps {}
 
 export const SwapRoot = (props: SwapRootProps) => {
-  const [swapProps, localProps] = splitProps(props, ['swap', 'lazyMount', 'unmountOnExit'])
+  const localProps = omit(props, 'swap', 'lazyMount', 'unmountOnExit')
   const swap = useSwap(() => swapProps)
   const mergedProps = mergeProps(() => swap().getRootProps(), localProps)
 

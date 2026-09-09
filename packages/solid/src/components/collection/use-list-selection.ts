@@ -1,4 +1,3 @@
-import { splitProps } from '../../utils/split-props.ts'
 import { Selection, type SelectionMode } from '@zag-js/collection'
 import { createEffect, createMemo, createSignal } from 'solid-js'
 import type { MaybeAccessor } from '../../types.ts'
@@ -30,35 +29,25 @@ export interface UseListSelectionProps<T extends CollectionItem> {
 export function useListSelection<T extends CollectionItem>(
   props: MaybeAccessor<UseListSelectionProps<T>>,
 ): UseListSelectionReturn {
-  const splittedProps = createMemo(() => {
-    const rawProps = typeof props === 'function' ? props() : props
-    return splitProps(rawProps, [
-      'collection',
-      'selectionMode',
-      'deselectable',
-      'initialSelectedValues',
-      'resetOnCollectionChange',
-    ])
-  })
+  // Read the caller's own keys straight off `raw()`. Nothing here ever needed
+  // the rest half, so there is no split to make.
+  const raw = createMemo(() => (typeof props === 'function' ? props() : props))
 
   const createSelection = (values: string[] = []) => {
-    const [localProps] = splittedProps()
     const selection = new Selection(values)
-    selection.selectionMode = localProps.selectionMode ?? 'single'
-    selection.deselectable = localProps.deselectable ?? true
+    selection.selectionMode = raw().selectionMode ?? 'single'
+    selection.deselectable = raw().deselectable ?? true
     return selection
   }
 
   const init = () => {
-    const [localProps] = splittedProps()
-    return createSelection(localProps.initialSelectedValues ?? [])
+    return createSelection(raw().initialSelectedValues ?? [])
   }
 
   const [selection, setSelection] = createSignal(init())
 
   const watchDeps = () => {
-    const [{ collection, resetOnCollectionChange }] = splittedProps()
-    return [collection.getValues(), resetOnCollectionChange] as const
+    return [raw().collection.getValues(), raw().resetOnCollectionChange] as const
   }
 
   createEffect(
@@ -76,13 +65,11 @@ export function useListSelection<T extends CollectionItem>(
   const isEmpty = createMemo(() => selection().isEmpty())
 
   const firstSelectedValue = createMemo(() => {
-    const [localProps] = splittedProps()
-    return selection().firstSelectedValue(localProps.collection)
+    return selection().firstSelectedValue(raw().collection)
   })
 
   const lastSelectedValue = createMemo(() => {
-    const [localProps] = splittedProps()
-    return selection().lastSelectedValue(localProps.collection)
+    return selection().lastSelectedValue(raw().collection)
   })
 
   return {
@@ -94,37 +81,30 @@ export function useListSelection<T extends CollectionItem>(
       return selection().isSelected(value)
     },
     isAllSelected: () => {
-      const [localProps] = splittedProps()
-      const allValues = localProps.collection.getValues()
+      const allValues = raw().collection.getValues()
       return allValues.length > 0 && allValues.every((value) => selection().isSelected(value))
     },
     isSomeSelected: () => {
-      const [localProps] = splittedProps()
-      const allValues = localProps.collection.getValues()
+      const allValues = raw().collection.getValues()
       return allValues.some((value) => selection().isSelected(value))
     },
     canSelect: (value: string) => {
-      const [localProps] = splittedProps()
-      return selection().canSelect(localProps.collection, value)
+      return selection().canSelect(raw().collection, value)
     },
     select: (value: string, forceToggle?: boolean) => {
-      const [localProps] = splittedProps()
-      setSelection(selection().select(localProps.collection, value, forceToggle))
+      setSelection(selection().select(raw().collection, value, forceToggle))
     },
     deselect: (value: string) => {
       setSelection(selection().deselect(value))
     },
     toggle: (value: string) => {
-      const [localProps] = splittedProps()
-      setSelection(selection().toggleSelection(localProps.collection, value))
+      setSelection(selection().toggleSelection(raw().collection, value))
     },
     replace: (value: string | null) => {
-      const [localProps] = splittedProps()
-      setSelection(selection().replaceSelection(localProps.collection, value))
+      setSelection(selection().replaceSelection(raw().collection, value))
     },
     extend: (anchorValue: string, targetValue: string) => {
-      const [localProps] = splittedProps()
-      setSelection(selection().extendSelection(localProps.collection, anchorValue, targetValue))
+      setSelection(selection().extendSelection(raw().collection, anchorValue, targetValue))
     },
     setSelectedValues: (values: string[]) => {
       setSelection(selection().setSelection(values))

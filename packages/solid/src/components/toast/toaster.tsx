@@ -1,7 +1,6 @@
-import { splitProps } from '../../utils/split-props.ts'
 import { Key, mergeProps, normalizeProps, useMachine } from '@zag-js/solid'
 import * as toast from '@zag-js/toast'
-import { type Accessor, createMemo, createUniqueId } from 'solid-js'
+import { type Accessor, createMemo, createUniqueId, omit } from 'solid-js'
 import type { JSX } from '@solidjs/web'
 import { useEnvironmentContext, useLocaleContext } from '../../providers/index.tsx'
 import type { Assign } from '../../types.ts'
@@ -23,34 +22,29 @@ export interface ToasterBaseProps extends Omit<toast.GroupProps, 'id' | 'store'>
 export interface ToasterProps extends Assign<HTMLProps<'div'>, ToasterBaseProps> {}
 
 export const Toaster = (props: ToasterProps) => {
-  const [toasterProps, machineProps, groupProps, localProps] = splitProps(
-    props,
-    ['toaster', 'children'],
-    ['dir', 'getRootNode'],
-    ['label'],
-  )
+  const localProps = omit(props, 'toaster', 'children', 'dir', 'getRootNode', 'label')
 
   const locale = useLocaleContext()
   const env = useEnvironmentContext()
 
   const service = useMachine(toast.group.machine, () => ({
-    store: toasterProps.toaster,
+    store: props.toaster,
     id: createUniqueId(),
-    dir: machineProps.dir ?? locale()?.dir,
-    getRootNode: machineProps.getRootNode ?? env()?.getRootNode,
+    dir: props.dir ?? locale()?.dir,
+    getRootNode: props.getRootNode ?? env()?.getRootNode,
   }))
 
   const api = createMemo(() => toast.group.connect(service, normalizeProps))
   const toasts = createMemo(() => api().getToasts())
 
-  const mergedProps = mergeProps(() => api().getGroupProps(groupProps), localProps)
+  const mergedProps = mergeProps(() => api().getGroupProps({ label: props.label }), localProps)
 
   return (
     <div {...mergedProps}>
       <Key each={toasts()} by="id">
         {(toast, index) => (
           <ToastActor value={toast} index={index} parent={service}>
-            {(ctx) => toasterProps.children(ctx)}
+            {(ctx) => props.children(ctx)}
           </ToastActor>
         )}
       </Key>

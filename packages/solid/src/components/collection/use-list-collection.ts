@@ -1,5 +1,4 @@
-import { splitProps } from '../../utils/split-props.ts'
-import { createMemo, createSignal } from 'solid-js'
+import { createMemo, createSignal, omit } from 'solid-js'
 import type { MaybeAccessor } from '../../types.ts'
 import { type CollectionOptions, type ListCollection, createListCollection } from './list-collection.ts'
 
@@ -20,14 +19,13 @@ export interface UseListCollectionProps<T> extends Omit<CollectionOptions<T>, 'i
 }
 
 export function useListCollection<T>(props: MaybeAccessor<UseListCollectionProps<T>>): UseListCollectionReturn<T> {
-  const splittedProps = createMemo(() => {
-    const rawProps = typeof props === 'function' ? props() : props
-    return splitProps(rawProps, ['initialItems', 'filter', 'limit'])
-  })
+  // Two memos, not a split tuple: the caller's own keys are read straight off
+  // `raw()`, and `omit` gives the collection options in one native call.
+  const raw = createMemo(() => (typeof props === 'function' ? props() : props))
+  const collectionOptions = createMemo(() => omit(raw(), 'initialItems', 'filter', 'limit'))
 
   const init = () => {
-    const [localProps] = splittedProps()
-    return localProps.initialItems
+    return raw().initialItems
   }
 
   const [items, setItemsImpl] = createSignal<T[] | readonly T[]>(init())
@@ -39,13 +37,11 @@ export function useListCollection<T>(props: MaybeAccessor<UseListCollectionProps
   }
 
   const create = (itemsToCreate: T[] | readonly T[]) => {
-    const [, collectionOptions] = splittedProps()
-    return createListCollection({ ...collectionOptions, items: itemsToCreate })
+    return createListCollection({ ...collectionOptions(), items: itemsToCreate })
   }
 
   const collection = createMemo(() => {
-    const [localProps, collectionOptions] = splittedProps()
-    const filter = localProps.filter
+    const filter = raw().filter
 
     let activeItems = items()
 
@@ -55,8 +51,8 @@ export function useListCollection<T>(props: MaybeAccessor<UseListCollectionProps
     }
 
     // Apply limit
-    const limitedItems = localProps.limit == null ? activeItems : activeItems.slice(0, localProps.limit)
-    return createListCollection({ ...collectionOptions, items: limitedItems })
+    const limitedItems = raw().limit == null ? activeItems : activeItems.slice(0, raw().limit)
+    return createListCollection({ ...collectionOptions(), items: limitedItems })
   })
 
   return {
@@ -68,8 +64,7 @@ export function useListCollection<T>(props: MaybeAccessor<UseListCollectionProps
       setItems(newItems)
     },
     reset: () => {
-      const [localProps] = splittedProps()
-      setItems(localProps.initialItems)
+      setItems(raw().initialItems)
     },
     clear: () => {
       setItems([])

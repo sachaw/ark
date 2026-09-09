@@ -1,6 +1,5 @@
-import { splitProps } from '../../utils/split-props.ts'
 import type { JsonNode } from '@zag-js/json-tree-utils'
-import { createMemo } from 'solid-js'
+import { createMemo, omit } from 'solid-js'
 import type { JSX } from '@solidjs/web'
 import { TreeView } from '../tree-view/index.tsx'
 import { JsonTreeViewPropsProvider } from './json-tree-view-props-context.ts'
@@ -11,15 +10,15 @@ export interface JsonTreeViewRootProviderProps extends Omit<TreeView.RootProvide
 }
 
 export const JsonTreeViewRootProvider = (props: JsonTreeViewRootProviderProps): JSX.Element => {
-  const [localProps, restProps] = splitProps(props, ['value'])
+  const restProps = omit(props, 'value')
 
   const treeView = createMemo(() => {
-    const { options: _, ...rest } = localProps.value()
+    const { options: _, ...rest } = props.value()
     return rest
   })
 
   return (
-    <JsonTreeViewPropsProvider value={localProps.value().options}>
+    <JsonTreeViewPropsProvider value={props.value().options}>
       <TreeView.RootProvider data-scope="json-tree-view" value={treeView} {...restProps} />
     </JsonTreeViewPropsProvider>
   )
