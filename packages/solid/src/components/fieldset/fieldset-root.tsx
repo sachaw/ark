@@ -1,3 +1,4 @@
+import { untrack } from 'solid-js'
 import { mergeProps } from '@zag-js/solid'
 import { composeRefs } from '../../utils/compose-refs.ts'
 import { createSplitProps } from '../../utils/create-split-props.ts'
@@ -13,9 +14,15 @@ export const FieldsetRoot = (props: FieldsetRootProps) => {
   const fieldset = useFieldset(useFieldsetProps)
   const mergedProps = mergeProps(() => fieldset().getRootProps(), localProps)
 
+  // Hoisted and untracked: `ref` is evaluated EAGERLY when the child is
+  // constructed, and a flow component constructs its child inside a tracking
+  // memo — so reading an accessor here subscribes THAT memo to this state and
+  // every change re-creates the element. The ref setter itself never changes.
+  const fieldsetRefsRootRef = untrack(() => fieldset().refs.rootRef)
+
   return (
     <FieldsetProvider value={fieldset}>
-      <ark.fieldset {...mergedProps} ref={composeRefs(fieldset().refs.rootRef, props.ref)} />
+      <ark.fieldset {...mergedProps} ref={composeRefs(fieldsetRefsRootRef, props.ref)} />
     </FieldsetProvider>
   )
 }

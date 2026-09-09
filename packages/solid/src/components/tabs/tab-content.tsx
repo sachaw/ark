@@ -1,6 +1,6 @@
 import { mergeProps } from '@zag-js/solid'
 import type { ContentProps, ContentState } from '@zag-js/tabs'
-import { Show } from 'solid-js'
+import { Show, untrack } from 'solid-js'
 import { composeRefs } from '../../utils/compose-refs.ts'
 import { createSplitProps } from '../../utils/create-split-props.ts'
 import { useRenderStrategyContext } from '../../utils/render-strategy.ts'
@@ -29,12 +29,18 @@ export const TabContent = (props: TabContentProps) => {
     localProps,
   )
 
+  // Hoisted and untracked: `ref` is evaluated EAGERLY when the child is
+  // constructed, and a flow component constructs its child inside a tracking
+  // memo — so reading an accessor here subscribes THAT memo to this state and
+  // every change re-creates the element. The ref setter itself never changes.
+  const presenceApiRef = untrack(() => presenceApi().ref)
+
   return (
     <PresenceProvider value={presenceApi}>
       <Show when={!presenceApi().unmounted}>
         <ark.div
           {...mergedProps}
-          ref={composeRefs(presenceApi().ref, props.ref)}
+          ref={composeRefs(presenceApiRef, props.ref)}
           state={api().getContentState(contentProps)}
         />
       </Show>
