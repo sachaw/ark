@@ -1,7 +1,6 @@
-import { splitProps } from '../../utils/split-props.ts'
 import { Key, mergeProps, normalizeProps, useMachine } from '@zag-js/solid'
 import * as toast from '@zag-js/toast'
-import { type Accessor, createMemo, createUniqueId } from 'solid-js'
+import { type Accessor, createMemo, createUniqueId, omit } from 'solid-js'
 import type { JSX } from '@solidjs/web'
 import { useEnvironmentContext, useLocaleContext } from '../../providers/index.tsx'
 import type { Assign } from '../../types.ts'
@@ -18,13 +17,13 @@ export interface ToasterBaseProps extends PolymorphicProps<'div'>, Omit<toast.Gr
 export interface ToasterProps extends Assign<HTMLProps<'div'>, ToasterBaseProps> {}
 
 export const Toaster = (props: ToasterProps) => {
-  const [toasterProps, localProps] = splitProps(props, ['toaster', 'children'])
+  const localProps = omit(props, 'toaster', 'children')
 
   const locale = useLocaleContext()
   const env = useEnvironmentContext()
 
   const service = useMachine(toast.group.machine, () => ({
-    store: toasterProps.toaster,
+    store: props.toaster,
     id: createUniqueId(),
     dir: locale()?.dir,
     getRootNode: env()?.getRootNode,
@@ -40,7 +39,7 @@ export const Toaster = (props: ToasterProps) => {
       <Key each={toasts()} by="id">
         {(toast, index) => (
           <ToastActor value={toast} index={index} parent={service}>
-            {(ctx) => toasterProps.children(ctx)}
+            {(ctx) => props.children(ctx)}
           </ToastActor>
         )}
       </Key>

@@ -1,6 +1,5 @@
-import { splitProps } from '../../utils/split-props.ts'
 import type { JSX } from '@solidjs/web'
-import { Show, createEffect, createMemo, createSignal, onCleanup } from 'solid-js'
+import { createEffect, createMemo, createSignal, omit, onCleanup, Show } from 'solid-js'
 import { Portal } from '@solidjs/web'
 import { EnvironmentProvider } from '../../providers/index.tsx'
 import type { Assign } from '../../types.ts'
@@ -30,9 +29,9 @@ function getMountNode(frame: HTMLIFrameElement) {
 }
 
 export const Frame = (props: FrameProps) => {
-  const [frameProps, localProps] = splitProps(props, ['children', 'head', 'onMount', 'onUnmount', 'srcdoc'])
+  const localProps = omit(props, 'children', 'head', 'onMount', 'onUnmount', 'srcdoc')
 
-  const srcdoc = createMemo(() => frameProps.srcdoc ?? initialSrcDoc)
+  const srcdoc = createMemo(() => props.srcdoc ?? initialSrcDoc)
 
   const [frameRef, setFrameRef] = createSignal<HTMLIFrameElement | null>(null)
   const [mountNode, setMountNode] = createSignal<HTMLElement | null>(null)
@@ -92,14 +91,14 @@ export const Frame = (props: FrameProps) => {
         <Show when={mountNode()}>
           {(node) => (
             <Portal mount={node()}>
-              <FrameContent onMount={frameProps.onMount} onUnmount={frameProps.onUnmount}>
-                {frameProps.children}
+              <FrameContent onMount={props.onMount} onUnmount={props.onUnmount}>
+                {props.children}
               </FrameContent>
             </Portal>
           )}
         </Show>
         <Show when={mountNode()}>
-          <Portal mount={frameRef()!.contentDocument!.head}>{frameProps.head}</Portal>
+          <Portal mount={frameRef()!.contentDocument!.head}>{props.head}</Portal>
         </Show>
       </ark.iframe>
     </EnvironmentProvider>

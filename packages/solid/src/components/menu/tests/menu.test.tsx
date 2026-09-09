@@ -1,4 +1,4 @@
-import { splitProps } from '../../../utils/split-props.ts'
+import { omit } from 'solid-js'
 import { Menu } from '@ark-ui/solid/menu'
 import { fireEvent, render, screen, waitFor } from '@solidjs/testing-library'
 import { For } from 'solid-js'
@@ -9,13 +9,13 @@ interface ComponentUnderTestProps extends Menu.RootProps {
 }
 
 const ComponentUnderTest = (props: ComponentUnderTestProps) => {
-  const [{ contextMenu, onValueChange }, rootProps] = splitProps(props, ['onValueChange', 'contextMenu'])
+  const rootProps = omit(props, 'onValueChange', 'contextMenu')
   return (
     <Menu.Root {...rootProps}>
       <Menu.Trigger>
         Open menu <Menu.Indicator />
       </Menu.Trigger>
-      {contextMenu && <Menu.ContextTrigger>Open Context Menu</Menu.ContextTrigger>}
+      {props.contextMenu && <Menu.ContextTrigger>Open Context Menu</Menu.ContextTrigger>}
       <Menu.Positioner data-testid="positioner">
         <Menu.Content>
           <Menu.Arrow>
@@ -33,7 +33,7 @@ const ComponentUnderTest = (props: ComponentUnderTestProps) => {
             <Menu.ItemText>Check me</Menu.ItemText>
           </Menu.CheckboxItem>
           <Menu.Separator />
-          <Menu.RadioItemGroup value="react" onValueChange={onValueChange}>
+          <Menu.RadioItemGroup value="react" onValueChange={props.onValueChange}>
             <Menu.ItemGroupLabel>JS Frameworks</Menu.ItemGroupLabel>
             <For each={['react', 'solid', 'svelte', 'vue']} keyed={false}>
               {(framework) => (

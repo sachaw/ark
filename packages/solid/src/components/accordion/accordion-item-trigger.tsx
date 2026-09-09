@@ -1,5 +1,5 @@
-import { splitProps } from '../../utils/split-props.ts'
 import { mergeProps } from '@zag-js/solid'
+import { omit } from 'solid-js'
 
 import { useCollapsibleContext } from '../collapsible/index.tsx'
 import { type HTMLProps, type PolymorphicProps, ark } from '../factory.tsx'
@@ -15,7 +15,14 @@ export const AccordionItemTrigger = (props: AccordionItemTriggerProps) => {
   const collapsible = useCollapsibleContext()
 
   const mergedProps = mergeProps(() => accordion().getItemTriggerProps(itemProps), props)
-  const [ariaControls, buttonProps] = splitProps(mergedProps, ['aria-controls'])
+  const buttonProps = omit(mergedProps, 'aria-controls')
 
-  return <ark.button {...buttonProps} {...(!collapsible().unmounted && ariaControls)} />
+  // The attribute is stated or it is absent — `undefined` removes it. That is
+  // the whole point of a conditional spread here, said directly.
+  return (
+    <ark.button
+      {...buttonProps}
+      aria-controls={collapsible().unmounted ? undefined : mergedProps['aria-controls']}
+    />
+  )
 }

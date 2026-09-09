@@ -1,6 +1,5 @@
-import { splitProps } from '../../utils/split-props.ts'
 import { mergeProps } from '@zag-js/solid'
-import { Show } from 'solid-js'
+import { omit, Show } from 'solid-js'
 import type { JSX } from '@solidjs/web'
 import type { HTMLProps, PolymorphicProps } from '../factory.tsx'
 import { ark } from '../factory.tsx'
@@ -13,13 +12,13 @@ export interface ToggleIndicatorBaseProps extends PolymorphicProps<'div'> {
 export interface ToggleIndicatorProps extends HTMLProps<'div'>, ToggleIndicatorBaseProps {}
 
 export const ToggleIndicator = (props: ToggleIndicatorProps) => {
-  const [baseProps, restProps] = splitProps(props, ['children', 'fallback'])
+  const restProps = omit(props, 'children', 'fallback')
   const toggle = useToggleContext()
   const mergedProps = mergeProps(() => toggle().getIndicatorProps(), restProps)
   return (
     <ark.div {...mergedProps}>
-      <Show when={toggle().pressed} fallback={baseProps.fallback}>
-        {baseProps.children}
+      <Show when={toggle().pressed} fallback={props.fallback}>
+        {props.children}
       </Show>
     </ark.div>
   )

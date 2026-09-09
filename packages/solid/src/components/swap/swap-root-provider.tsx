@@ -1,6 +1,5 @@
-import { splitProps } from '../../utils/split-props.ts'
 import { mergeProps } from '@zag-js/solid'
-import { type Accessor } from 'solid-js'
+import { type Accessor, omit } from 'solid-js'
 import { type HTMLProps, type PolymorphicProps, ark } from '../factory.tsx'
 import type { UseSwapReturn } from './use-swap.ts'
 import { SwapProvider } from './use-swap-context.ts'
@@ -12,11 +11,11 @@ export interface SwapRootProviderBaseProps extends PolymorphicProps<'span'> {
 export interface SwapRootProviderProps extends HTMLProps<'span'>, SwapRootProviderBaseProps {}
 
 export const SwapRootProvider = (props: SwapRootProviderProps) => {
-  const [providerProps, localProps] = splitProps(props, ['value'])
-  const mergedProps = mergeProps(() => providerProps.value().getRootProps(), localProps)
+  const localProps = omit(props, 'value')
+  const mergedProps = mergeProps(() => props.value().getRootProps(), localProps)
 
   return (
-    <SwapProvider value={providerProps.value}>
+    <SwapProvider value={props.value}>
       <ark.span {...mergedProps} />
     </SwapProvider>
   )

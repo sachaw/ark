@@ -1,4 +1,4 @@
-import { splitProps } from '../../utils/split-props.ts'
+import { omit } from 'solid-js'
 
 import type { JSX } from '@solidjs/web'
 import type { HTMLProps, PolymorphicProps } from '../factory.tsx'
@@ -10,16 +10,16 @@ export interface DownloadTriggerBaseProps extends PolymorphicProps<'button'>, Us
 export interface DownloadTriggerProps extends HTMLProps<'button'>, DownloadTriggerBaseProps {}
 
 export function DownloadTrigger(props: DownloadTriggerProps) {
-  const [downloadProps, restProps] = splitProps(props, ['fileName', 'data', 'mimeType', 'onClick'])
+  const restProps = omit(props, 'fileName', 'data', 'mimeType', 'onClick')
   const { download } = useDownload(() => ({
-    fileName: downloadProps.fileName,
-    mimeType: downloadProps.mimeType,
-    data: downloadProps.data,
+    fileName: props.fileName,
+    mimeType: props.mimeType,
+    data: props.data,
   }))
 
   const handleClick: JSX.EventHandlerUnion<HTMLButtonElement, MouseEvent> = (e) => {
-    if (typeof downloadProps.onClick === 'function') {
-      downloadProps.onClick(e)
+    if (typeof props.onClick === 'function') {
+      props.onClick(e)
     }
 
     if (e.defaultPrevented) return
