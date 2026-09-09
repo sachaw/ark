@@ -4,7 +4,4 @@ import { createContext } from '../../utils/create-context.ts'
 
 export interface UseStepsItemContext extends Accessor<ItemState> {}
 
-export const [StepsItemProvider, useStepsItemContext] = createContext<UseStepsItemContext>({
-  hookName: 'useStepsItemContext',
-  providerName: '<StepsItem />',
-})
+export const [StepsItemProvider, useStepsItemContext] = createContext<UseStepsItemContext>('StepsItemProvider')

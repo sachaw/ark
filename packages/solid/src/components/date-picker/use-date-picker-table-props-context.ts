@@ -3,7 +3,4 @@ import { createContext } from '../../utils/create-context.ts'
 
 export interface UseDatePickerTableContext extends TableProps {}
 
-export const [DatePickerTableProvider, useDatePickerTableContext] = createContext<UseDatePickerTableContext>({
-  hookName: 'useDatePickerTableContext',
-  providerName: '<DatePickerTableProvider />',
-})
+export const [DatePickerTableProvider, useDatePickerTableContext] = createContext<UseDatePickerTableContext>('DatePickerTableProvider')

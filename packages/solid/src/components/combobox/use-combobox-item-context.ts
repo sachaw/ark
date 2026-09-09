@@ -4,7 +4,4 @@ import { createContext } from '../../utils/create-context.ts'
 
 export interface UseComboboxItemContext extends Accessor<ItemState> {}
 
-export const [ComboboxItemProvider, useComboboxItemContext] = createContext<UseComboboxItemContext>({
-  hookName: 'useComboboxItemContext',
-  providerName: '<ComboboxItemProvider />',
-})
+export const [ComboboxItemProvider, useComboboxItemContext] = createContext<UseComboboxItemContext>('ComboboxItemProvider')

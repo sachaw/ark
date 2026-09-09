@@ -1,9 +1,4 @@
 import type { ViewportProps } from '@zag-js/navigation-menu'
-import { createContext } from '../../utils/create-context.ts'
+import { createOptionalContext } from '../../utils/create-context.ts'
 
-export const [NavigationMenuViewportPropsProvider, useNavigationMenuViewportPropsContext] =
-  createContext<ViewportProps>({
-    hookName: 'useNavigationMenuViewportPropsContext',
-    providerName: '<NavigationMenuViewportPropsProvider />',
-    strict: false,
-  })
+export const [NavigationMenuViewportPropsProvider, useNavigationMenuViewportPropsContext] = createOptionalContext<ViewportProps>('NavigationMenuViewportPropsProvider')

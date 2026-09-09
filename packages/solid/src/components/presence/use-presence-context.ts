@@ -3,7 +3,4 @@ import type { UsePresenceReturn } from './use-presence.ts'
 
 export interface UsePresenceContext extends UsePresenceReturn {}
 
-export const [PresenceProvider, usePresenceContext] = createContext<UsePresenceContext>({
-  hookName: 'usePresenceContext',
-  providerName: '<PresenceProvider />',
-})
+export const [PresenceProvider, usePresenceContext] = createContext<UsePresenceContext>('PresenceProvider')

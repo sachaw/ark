@@ -3,7 +3,4 @@ import type { UseSwitchReturn } from './use-switch.ts'
 
 export interface UseSwitchContext extends UseSwitchReturn {}
 
-export const [SwitchProvider, useSwitchContext] = createContext<UseSwitchContext>({
-  hookName: 'useSwitchContext',
-  providerName: '<SwitchProvider />',
-})
+export const [SwitchProvider, useSwitchContext] = createContext<UseSwitchContext>('SwitchProvider')

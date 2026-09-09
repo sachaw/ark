@@ -4,7 +4,7 @@ import { createUniqueId } from 'solid-js'
 import type { Optional } from '../../types.ts'
 import { createSplitProps } from '../../utils/create-split-props.ts'
 import { type HTMLProps, type PolymorphicProps, ark } from '../factory.tsx'
-import { useMenuContext } from './use-menu-context.ts'
+import { useStrictMenuContext } from './use-menu-context.ts'
 import { MenuItemGroupProvider } from './use-menu-item-group-context.ts'
 
 type OptionalItemGroupProps = Optional<ItemGroupProps, 'id'>
@@ -15,7 +15,7 @@ export interface MenuItemGroupProps extends HTMLProps<'div'>, MenuItemGroupBaseP
 export const MenuItemGroup = (props: MenuItemGroupProps) => {
   const [optionalItemGroupProps, localProps] = createSplitProps<OptionalItemGroupProps>()(props, ['id'])
   const itemGroupProps = mergeProps({ id: createUniqueId() }, optionalItemGroupProps)
-  const menu = useMenuContext()
+  const menu = useStrictMenuContext()
   const mergedProps = mergeProps(() => menu().getItemGroupProps(itemGroupProps), localProps)
 
   return (

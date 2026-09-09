@@ -3,7 +3,4 @@ import type { UseTocReturn } from './use-toc'
 
 export interface UseTocContext extends UseTocReturn {}
 
-export const [TocProvider, useTocContext] = createContext<UseTocContext>({
-  hookName: 'useTocContext',
-  providerName: '<TocProvider />',
-})
+export const [TocProvider, useTocContext] = createContext<UseTocContext>('TocProvider')

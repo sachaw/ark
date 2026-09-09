@@ -4,7 +4,7 @@ import { Show } from 'solid-js'
 import { composeRefs } from '../../utils/compose-refs.ts'
 import { type HTMLProps, type PolymorphicProps, ark } from '../factory.tsx'
 import { usePresenceContext } from '../presence/index.tsx'
-import { useMenuContext } from './use-menu-context.ts'
+import { useStrictMenuContext } from './use-menu-context.ts'
 
 export interface MenuContentState extends ContentState {}
 
@@ -12,7 +12,7 @@ export interface MenuContentBaseProps extends PolymorphicProps<'div', MenuConten
 export interface MenuContentProps extends HTMLProps<'div'>, MenuContentBaseProps {}
 
 export const MenuContent = (props: MenuContentProps) => {
-  const context = useMenuContext()
+  const context = useStrictMenuContext()
   const presenceContext = usePresenceContext()
   const mergedProps = mergeProps(
     () => context().getContentProps(),

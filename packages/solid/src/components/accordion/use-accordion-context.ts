@@ -3,7 +3,4 @@ import type { UseAccordionReturn } from './use-accordion.ts'
 
 export interface UseAccordionContext extends UseAccordionReturn {}
 
-export const [AccordionProvider, useAccordionContext] = createContext<UseAccordionContext>({
-  hookName: 'useAccordionContext',
-  providerName: '<AccordionProvider />',
-})
+export const [AccordionProvider, useAccordionContext] = createContext<UseAccordionContext>('AccordionProvider')

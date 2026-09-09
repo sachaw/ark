@@ -3,7 +3,4 @@ import type { UseQrCodeReturn } from './use-qr-code.ts'
 
 export interface UseQrCodeContext extends UseQrCodeReturn {}
 
-export const [QrCodeProvider, useQrCodeContext] = createContext<UseQrCodeContext>({
-  hookName: 'useQrCodeContext',
-  providerName: '<QrCodeProvider />',
-})
+export const [QrCodeProvider, useQrCodeContext] = createContext<UseQrCodeContext>('QrCodeProvider')

@@ -4,7 +4,4 @@ import { createContext } from '../../utils/create-context.ts'
 
 export interface UseSelectItemContext extends Accessor<ItemState> {}
 
-export const [SelectItemProvider, useSelectItemContext] = createContext<UseSelectItemContext>({
-  hookName: 'useSelectItemContext',
-  providerName: '<SelectItemProvider />',
-})
+export const [SelectItemProvider, useSelectItemContext] = createContext<UseSelectItemContext>('SelectItemProvider')

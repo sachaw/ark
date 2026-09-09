@@ -4,7 +4,4 @@ import { createContext } from '../../utils/create-context.ts'
 
 export interface UseTagsInputItemContext extends Accessor<ItemState> {}
 
-export const [TagsInputItemProvider, useTagsInputItemContext] = createContext<UseTagsInputItemContext>({
-  hookName: 'useTagsInputItemContext',
-  providerName: '<TagsInputItemProvider />',
-})
+export const [TagsInputItemProvider, useTagsInputItemContext] = createContext<UseTagsInputItemContext>('TagsInputItemProvider')

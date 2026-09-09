@@ -3,7 +3,4 @@ import type { UseScrollAreaReturn } from './use-scroll-area.ts'
 
 export interface UseScrollAreaContext extends UseScrollAreaReturn {}
 
-export const [ScrollAreaProvider, useScrollAreaContext] = createContext<UseScrollAreaContext>({
-  hookName: 'useScrollAreaContext',
-  providerName: '<ScrollAreaProvider />',
-})
+export const [ScrollAreaProvider, useScrollAreaContext] = createContext<UseScrollAreaContext>('ScrollAreaProvider')

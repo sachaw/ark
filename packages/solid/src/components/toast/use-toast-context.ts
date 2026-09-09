@@ -6,7 +6,4 @@ import { createContext } from '../../utils/create-context.ts'
 
 export interface UseToastContext extends Accessor<toast.Api<PropTypes, JSX.Element>> {}
 
-export const [ToastProvider, useToastContext] = createContext<UseToastContext>({
-  hookName: 'useToastContext',
-  providerName: '<ToastProvider />',
-})
+export const [ToastProvider, useToastContext] = createContext<UseToastContext>('ToastProvider')

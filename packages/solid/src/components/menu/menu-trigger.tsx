@@ -4,7 +4,7 @@ import type { Assign } from '../../types.ts'
 import { createSplitProps } from '../../utils/create-split-props.ts'
 import { type HTMLProps, type PolymorphicProps, ark } from '../factory.tsx'
 import { usePresenceContext } from '../presence/index.tsx'
-import { useMenuContext } from './use-menu-context.ts'
+import { useStrictMenuContext } from './use-menu-context.ts'
 
 export interface MenuTriggerState extends TriggerState {}
 
@@ -13,7 +13,7 @@ export interface MenuTriggerProps extends Assign<HTMLProps<'button'>, MenuTrigge
 
 export const MenuTrigger = (props: MenuTriggerProps) => {
   const [triggerProps, localProps] = createSplitProps<TriggerProps>()(props, ['value'])
-  const api = useMenuContext()
+  const api = useStrictMenuContext()
   const presenceApi = usePresenceContext()
   const mergedProps = mergeProps(
     () => api().getTriggerProps(triggerProps),

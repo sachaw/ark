@@ -3,7 +3,4 @@ import type { UseClipboardReturn } from './use-clipboard.ts'
 
 export interface UseClipboardContext extends UseClipboardReturn {}
 
-export const [ClipboardProvider, useClipboardContext] = createContext<UseClipboardContext>({
-  hookName: 'useClipboardContext',
-  providerName: '<ClipboardProvider />',
-})
+export const [ClipboardProvider, useClipboardContext] = createContext<UseClipboardContext>('ClipboardProvider')

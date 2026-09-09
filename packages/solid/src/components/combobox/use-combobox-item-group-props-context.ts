@@ -3,7 +3,4 @@ import { createContext } from '../../utils/create-context.ts'
 
 export interface UseComboboxItemGroupPropsContext extends ItemGroupProps {}
 
-export const [ComboboxItemGroupPropsProvider, useComboboxItemGroupPropsContext] = createContext<ItemGroupProps>({
-  hookName: 'useComboboxItemGroupPropsContext',
-  providerName: '<ComboboxItemGroupPropsProvider />',
-})
+export const [ComboboxItemGroupPropsProvider, useComboboxItemGroupPropsContext] = createContext<ItemGroupProps>('ComboboxItemGroupPropsProvider')

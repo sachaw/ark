@@ -5,7 +5,4 @@ import { createContext } from '../../utils/create-context.ts'
 
 export interface UseDrawerStackContext extends Accessor<DrawerStackApi<PropTypes>> {}
 
-export const [DrawerStackProvider, useDrawerStackContext] = createContext<UseDrawerStackContext>({
-  hookName: 'useDrawerStackContext',
-  providerName: '<DrawerStackProvider />',
-})
+export const [DrawerStackProvider, useDrawerStackContext] = createContext<UseDrawerStackContext>('DrawerStackProvider')

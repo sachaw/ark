@@ -3,7 +3,4 @@ import type { UseToggleGroupReturn } from './use-toggle-group.ts'
 
 export interface UseToggleGroupContext extends UseToggleGroupReturn {}
 
-export const [ToggleGroupProvider, useToggleGroupContext] = createContext<UseToggleGroupContext>({
-  hookName: 'useToggleGroupContext',
-  providerName: '<ToggleGroupProvider />',
-})
+export const [ToggleGroupProvider, useToggleGroupContext] = createContext<UseToggleGroupContext>('ToggleGroupProvider')

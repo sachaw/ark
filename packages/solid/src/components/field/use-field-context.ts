@@ -1,10 +1,6 @@
-import { createContext } from '../../utils/create-context.ts'
+import { createOptionalContext } from '../../utils/create-context.ts'
 import type { UseFieldReturn } from './use-field.ts'
 
 export interface UseFieldContext extends UseFieldReturn {}
 
-export const [FieldProvider, useFieldContext] = createContext<UseFieldContext>({
-  hookName: 'useFieldContext',
-  providerName: '<FieldProvider />',
-  strict: false,
-})
+export const [FieldProvider, useFieldContext, useStrictFieldContext] = createOptionalContext<UseFieldContext>('FieldProvider')

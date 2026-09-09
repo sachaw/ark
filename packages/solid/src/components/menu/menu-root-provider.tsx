@@ -3,7 +3,7 @@ import { createEffect } from 'solid-js'
 import type { JSX } from '@solidjs/web'
 import { PresenceProvider, type UsePresenceProps, splitPresenceProps, usePresence } from '../presence/index.tsx'
 import type { UseMenuReturn } from './use-menu.ts'
-import { MenuProvider, useMenuContext } from './use-menu-context.ts'
+import { MenuProvider, useStrictMenuContext } from './use-menu-context.ts'
 import { MenuMachineProvider, useMenuMachineContext } from './use-menu-machine-context.ts'
 import { MenuTriggerItemProvider } from './use-menu-trigger-item-context.ts'
 
@@ -17,13 +17,13 @@ export interface MenuRootProviderProps extends MenuRootProviderBaseProps {
 }
 
 export const MenuRootProvider = (props: MenuRootProviderProps) => {
-  const parentApi = useMenuContext()
+  const parentApi = useStrictMenuContext()
   const parentMachine = useMenuMachineContext()
   const [presenceProps, menuProps] = splitPresenceProps(props)
   const presenceApi = usePresence(mergeProps(presenceProps, () => ({ present: menuProps.value.api().open })))
 
   createEffect(
-    () => parentApi?.(),
+    () => parentApi(),
     (api) => {
       if (!parentMachine) return
       api?.setChild(menuProps.value.service)
@@ -31,7 +31,7 @@ export const MenuRootProvider = (props: MenuRootProviderProps) => {
     },
   )
 
-  const triggerItemContext = () => parentApi?.().getTriggerItemProps(menuProps.value.api())
+  const triggerItemContext = () => parentApi().getTriggerItemProps(menuProps.value.api())
 
   return (
     <MenuTriggerItemProvider value={triggerItemContext}>

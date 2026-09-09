@@ -4,9 +4,4 @@ import { createContext } from '../../utils/create-context.ts'
 
 export interface UseLocaleContext extends Accessor<Locale> {}
 
-export const [LocaleContextProvider, useLocaleContext] = createContext<UseLocaleContext>({
-  hookName: 'useEnvironmentContext',
-  providerName: '<EnvironmentProvider />',
-  strict: false,
-  defaultValue: () => ({ dir: 'ltr', locale: 'en-US' }),
-})
+export const [LocaleContextProvider, useLocaleContext] = createContext<UseLocaleContext>('LocaleContextProvider', () => ({ dir: 'ltr', locale: 'en-US' }))

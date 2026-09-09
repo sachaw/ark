@@ -3,7 +3,7 @@ import { createUniqueId } from 'solid-js'
 import type { Optional } from '../../types.ts'
 import { createSplitProps } from '../../utils/create-split-props.ts'
 import { type HTMLProps, type PolymorphicProps, ark } from '../factory.tsx'
-import { useMenuContext } from './use-menu-context.ts'
+import { useStrictMenuContext } from './use-menu-context.ts'
 import { MenuItemGroupProvider, type UseMenuItemGroupContext } from './use-menu-item-group-context.ts'
 
 type OptionalUseMenuItemGroupContext = Optional<UseMenuItemGroupContext, 'id'>
@@ -17,7 +17,7 @@ export const MenuRadioItemGroup = (props: MenuRadioItemGroupProps) => {
     'onValueChange',
     'value',
   ])
-  const context = useMenuContext()
+  const context = useStrictMenuContext()
   const itemGroupProps = mergeProps({ id: createUniqueId() }, optionalItemGroupProps)
   const mergedProps = mergeProps(() => context().getItemGroupProps(itemGroupProps), localProps)
 

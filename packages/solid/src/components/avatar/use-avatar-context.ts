@@ -3,7 +3,4 @@ import type { UseAvatarReturn } from './use-avatar.ts'
 
 export interface UseAvatarContext extends UseAvatarReturn {}
 
-export const [AvatarProvider, useAvatarContext] = createContext<UseAvatarContext>({
-  hookName: 'useAvatarContext',
-  providerName: '<AvatarProvider />',
-})
+export const [AvatarProvider, useAvatarContext] = createContext<UseAvatarContext>('AvatarProvider')

@@ -3,7 +3,4 @@ import type { UseDialogReturn } from './use-dialog.ts'
 
 export interface UseDialogContext extends UseDialogReturn {}
 
-export const [DialogProvider, useDialogContext] = createContext<UseDialogContext>({
-  hookName: 'useDialogContext',
-  providerName: '<DialogProvider />',
-})
+export const [DialogProvider, useDialogContext] = createContext<UseDialogContext>('DialogProvider')
