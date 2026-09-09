@@ -3,7 +3,4 @@ import type { UseCheckboxReturn } from './use-checkbox.ts'
 
 export interface UseCheckboxContext extends UseCheckboxReturn {}
 
-export const [CheckboxProvider, useCheckboxContext] = createContext<UseCheckboxContext>({
-  hookName: 'useCheckboxContext',
-  providerName: '<CheckboxProvider />',
-})
+export const [CheckboxProvider, useCheckboxContext] = createContext<UseCheckboxContext>('CheckboxProvider')

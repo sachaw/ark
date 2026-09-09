@@ -3,7 +3,4 @@ import type { UseTourReturn } from './use-tour.ts'
 
 export interface UseTourContext extends UseTourReturn {}
 
-export const [TourProvider, useTourContext] = createContext<UseTourContext>({
-  hookName: 'useTourContext',
-  providerName: '<TourProvider />',
-})
+export const [TourProvider, useTourContext] = createContext<UseTourContext>('TourProvider')

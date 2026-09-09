@@ -3,7 +3,4 @@ import type { UseEditableReturn } from './use-editable.ts'
 
 export interface UseEditableContext extends UseEditableReturn {}
 
-export const [EditableProvider, useEditableContext] = createContext<UseEditableContext>({
-  hookName: 'useEditableContext',
-  providerName: '<EditableProvider />',
-})
+export const [EditableProvider, useEditableContext] = createContext<UseEditableContext>('EditableProvider')

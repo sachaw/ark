@@ -3,7 +3,4 @@ import type { UseSignaturePadReturn } from './use-signature-pad.ts'
 
 export interface UseSignaturePadContext extends UseSignaturePadReturn {}
 
-export const [SignaturePadProvider, useSignaturePadContext] = createContext<UseSignaturePadContext>({
-  hookName: 'useSignaturePadContext',
-  providerName: '<SignaturePadProvider />',
-})
+export const [SignaturePadProvider, useSignaturePadContext] = createContext<UseSignaturePadContext>('SignaturePadProvider')

@@ -4,7 +4,4 @@ import { createContext } from '../../utils/create-context.ts'
 
 export interface UseAccordionItemContext extends Accessor<ItemState> {}
 
-export const [AccordionItemProvider, useAccordionItemContext] = createContext<UseAccordionItemContext>({
-  hookName: 'useAccordionItemContext',
-  providerName: '<AccordionItemProvider />',
-})
+export const [AccordionItemProvider, useAccordionItemContext] = createContext<UseAccordionItemContext>('AccordionItemProvider')

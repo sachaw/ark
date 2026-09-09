@@ -2,7 +2,7 @@ import { mergeProps } from '@zag-js/solid'
 import { Show } from 'solid-js'
 import type { JSX } from '@solidjs/web'
 import { type HTMLProps, type PolymorphicProps, ark } from '../factory.tsx'
-import { useFieldContext } from './use-field-context.ts'
+import { useStrictFieldContext } from './use-field-context.ts'
 
 export interface FieldRequiredIndicatorBaseProps extends PolymorphicProps<'span'> {
   fallback?: JSX.Element
@@ -10,7 +10,7 @@ export interface FieldRequiredIndicatorBaseProps extends PolymorphicProps<'span'
 export interface FieldRequiredIndicatorProps extends HTMLProps<'span'>, FieldRequiredIndicatorBaseProps {}
 
 export const FieldRequiredIndicator = (props: FieldRequiredIndicatorProps) => {
-  const field = useFieldContext()
+  const field = useStrictFieldContext()
   const mergedProps = mergeProps(() => field().getRequiredIndicatorProps(), props)
 
   return (

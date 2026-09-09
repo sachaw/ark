@@ -8,7 +8,4 @@ export interface JsonTreeViewOptions extends Partial<JsonNodePreviewOptions> {
   quotesOnKeys?: boolean
 }
 
-export const [JsonTreeViewPropsProvider, useJsonTreeViewPropsContext] = createContext<JsonTreeViewOptions>({
-  hookName: 'useJsonTreeViewPropsContext',
-  providerName: '<JsonTreeViewPropsProvider />',
-})
+export const [JsonTreeViewPropsProvider, useJsonTreeViewPropsContext] = createContext<JsonTreeViewOptions>('JsonTreeViewPropsProvider')

@@ -4,7 +4,4 @@ import { createContext } from '../../utils/create-context.ts'
 
 export interface UseRatingGroupItemContext extends Accessor<ItemState> {}
 
-export const [RatingGroupItemProvider, useRatingGroupItemContext] = createContext<UseRatingGroupItemContext>({
-  hookName: 'useRatingGroupItemContext',
-  providerName: '<RatingGroupItemProvider />',
-})
+export const [RatingGroupItemProvider, useRatingGroupItemContext] = createContext<UseRatingGroupItemContext>('RatingGroupItemProvider')

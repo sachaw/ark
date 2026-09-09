@@ -3,7 +3,4 @@ import { createContext } from '../../utils/create-context.ts'
 
 export interface UseStepsItemPropsContext extends ItemProps {}
 
-export const [StepsItemPropsProvider, useStepsItemPropsContext] = createContext<UseStepsItemPropsContext>({
-  hookName: 'useStepsItemPropsContext',
-  providerName: '<StepsItemPropsProvider />',
-})
+export const [StepsItemPropsProvider, useStepsItemPropsContext] = createContext<UseStepsItemPropsContext>('StepsItemPropsProvider')

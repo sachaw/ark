@@ -4,7 +4,4 @@ import { createContext } from '../../utils/create-context.ts'
 
 export interface UseListboxItemContext extends Accessor<ItemState> {}
 
-export const [ListboxItemProvider, useListboxItemContext] = createContext<UseListboxItemContext>({
-  hookName: 'useListboxItemContext',
-  providerName: '<ListboxItemProvider />',
-})
+export const [ListboxItemProvider, useListboxItemContext] = createContext<UseListboxItemContext>('ListboxItemProvider')

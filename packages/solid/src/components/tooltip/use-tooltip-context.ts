@@ -3,7 +3,4 @@ import type { UseTooltipReturn } from './use-tooltip.ts'
 
 export interface UseTooltipContext extends UseTooltipReturn {}
 
-export const [TooltipProvider, useTooltipContext] = createContext<UseTooltipContext>({
-  hookName: 'useTooltipContext',
-  providerName: '<TooltipProvider />',
-})
+export const [TooltipProvider, useTooltipContext] = createContext<UseTooltipContext>('TooltipProvider')

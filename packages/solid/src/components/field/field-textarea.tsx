@@ -3,7 +3,7 @@ import { mergeProps } from '@zag-js/solid'
 import { omit, onSettled } from 'solid-js'
 import { composeRefs } from '../../utils/compose-refs.ts'
 import { type HTMLProps, type PolymorphicProps, ark } from '../factory.tsx'
-import { useFieldContext } from './use-field-context.ts'
+import { useStrictFieldContext } from './use-field-context.ts'
 
 export interface FieldTextareaBaseProps extends PolymorphicProps<'textarea'> {
   /**
@@ -15,12 +15,12 @@ export interface FieldTextareaBaseProps extends PolymorphicProps<'textarea'> {
 export interface FieldTextareaProps extends HTMLProps<'textarea'>, FieldTextareaBaseProps {}
 
 export const FieldTextarea = (props: FieldTextareaProps) => {
-  const field = useFieldContext()
+  const field = useStrictFieldContext()
   let textareaRef: HTMLTextAreaElement
   const textareaProps = omit(props, 'autoresize')
 
   const mergedProps = mergeProps(
-    () => field?.().getTextareaProps(),
+    () => field().getTextareaProps(),
     () => ({ style: { resize: props.autoresize ? 'none' : undefined } }),
     textareaProps,
   )

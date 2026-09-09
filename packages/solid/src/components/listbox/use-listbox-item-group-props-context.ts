@@ -3,7 +3,4 @@ import { createContext } from '../../utils/create-context.ts'
 
 export interface UseListboxItemGroupPropsContext extends ItemGroupProps {}
 
-export const [ListboxItemGroupPropsProvider, useListboxItemGroupPropsContext] = createContext<ItemGroupProps>({
-  hookName: 'useListboxItemGroupPropsContext',
-  providerName: '<ListboxItemGroupPropsProvider />',
-})
+export const [ListboxItemGroupPropsProvider, useListboxItemGroupPropsContext] = createContext<ItemGroupProps>('ListboxItemGroupPropsProvider')

@@ -3,7 +3,4 @@ import type { UseRatingGroupReturn } from './use-rating-group.ts'
 
 export interface UseRatingGroupContext extends UseRatingGroupReturn {}
 
-export const [RatingGroupProvider, useRatingGroupContext] = createContext<UseRatingGroupContext>({
-  hookName: 'useRatingGroupContext',
-  providerName: '<RatingGroupProvider />',
-})
+export const [RatingGroupProvider, useRatingGroupContext] = createContext<UseRatingGroupContext>('RatingGroupProvider')

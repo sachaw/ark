@@ -1,51 +1,53 @@
-import { hasProp, isFunction } from '@zag-js/utils'
 import { type Context, createContext as createSolidContext, useContext as useSolidContext } from 'solid-js'
 
-export interface CreateContextOptions<T> {
-  strict?: boolean
-  hookName?: string
-  providerName?: string
-  errorMessage?: string
-  defaultValue?: T
+/**
+ * A context every consumer must be inside, and its reader.
+ *
+ * There is no wrapper around the read because 2.0 does not need one: a
+ * default-less context THROWS `ContextNotFoundError` when the value was never
+ * provided, and `useContext` types as `T` rather than `T | undefined`. The
+ * `hookName` / `providerName` / `errorMessage` / `captureStackTrace` plumbing
+ * this used to carry only restated what the runtime already does. The name is
+ * handed to Solid instead, where it reaches the dev graph.
+ *
+ * Pass a `defaultValue` for the frozen-config case — locale, environment — and
+ * the read simply never fails. That is a real default, not a stand-in for
+ * absence; see `createOptionalContext` for the difference.
+ */
+export function createContext<T>(name: string, defaultValue?: T): [Context<T>, () => T] {
+  const context = createSolidContext<T>(defaultValue, { name })
+  return [context, () => useSolidContext(context)]
 }
-
-// 2.0: there is no `.Provider` — the context IS the provider component
-// (`<Ctx value={...}>`), so the first tuple slot is the context itself.
-export type CreateContextReturn<T> = [Context<T>, () => T, Context<T>]
 
 const MISSING = Symbol('ark-ui.context.missing')
 
-function getErrorMessage(hook: string, provider: string) {
-  return `${hook} returned \`undefined\`. Seems you forgot to wrap component within ${provider}`
-}
-
-export function createContext<T>(options: CreateContextOptions<T> = {}) {
-  const { strict = true, hookName = 'useContext', providerName = 'Provider', errorMessage, defaultValue } = options
-
-  // 2.0: a context whose resolved value is `undefined` THROWS
-  // (`ContextNotFoundError`) rather than returning undefined, so a
-  // default-less context can no longer model "optional". Park a sentinel as
-  // the default and map it back to `undefined` on read, which preserves both
-  // ark's `strict: false` behaviour and its own nicer strict error message.
-  const Context = createSolidContext<T | typeof MISSING>(
-    defaultValue === undefined ? (MISSING as T | typeof MISSING) : defaultValue,
-  )
-
-  function useContext() {
-    const raw = useSolidContext(Context)
-    const context = (raw === MISSING ? undefined : raw) as T
-
-    if (!context && strict) {
-      const error = new Error(errorMessage ?? getErrorMessage(hookName, providerName))
-      error.name = 'ContextError'
-      if (hasProp(Error, 'captureStackTrace') && isFunction(Error.captureStackTrace)) {
-        Error.captureStackTrace(error, useContext)
-      }
-      throw error
-    }
-
-    return context
-  }
-
-  return [Context, useContext, Context] as CreateContextReturn<T>
+/**
+ * A context a component may legitimately render outside of.
+ *
+ * This is the one case 2.0 cannot express directly, and the reason a sentinel
+ * is not a leftover habit. Solid decides "never provided" from the resolved
+ * VALUE — `hasContext` is `!isUndefined(value)` — so a default-less context
+ * and an `undefined` default behave identically: both throw. Only a value that
+ * is always present can mean "nothing here", so a sentinel goes in as the
+ * default and the read maps it back to `undefined`.
+ */
+export function createOptionalContext<T>(name: string): [Context<T>, () => T | undefined, () => T] {
+  const context = createSolidContext<T | typeof MISSING>(MISSING, { name })
+  const read = () => useSolidContext(context)
+  return [
+    context as Context<T>,
+    () => {
+      const value = read()
+      return value === MISSING ? undefined : value
+    },
+    // The strict reader for the component's OWN parts. It has to do its own
+    // check: the sentinel is always present, so Solid's ContextNotFoundError
+    // can never fire on an optional context. `Field.ErrorText` outside a
+    // `Field.Root` is a usage error, and this is where it is said.
+    () => {
+      const value = read()
+      if (value === MISSING) throw new Error(`${name} is missing: this part must be rendered inside it`)
+      return value as T
+    },
+  ]
 }

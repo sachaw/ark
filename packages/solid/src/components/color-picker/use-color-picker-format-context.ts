@@ -1,13 +1,8 @@
 import type { ColorFormat } from '@zag-js/color-picker'
-import { createContext } from '../../utils/create-context.ts'
+import { createOptionalContext } from '../../utils/create-context.ts'
 
 export interface UseColorPickerSwatchPropsContext {
   format: ColorFormat
 }
 
-export const [ColorPickerFormatPropsProvider, useColorPickerFormatPropsContext] =
-  createContext<UseColorPickerSwatchPropsContext>({
-    hookName: 'useColorPickerFormatPropsContext',
-    providerName: '<ColorPickerFormatPropsProvider />',
-    strict: false,
-  })
+export const [ColorPickerFormatPropsProvider, useColorPickerFormatPropsContext] = createOptionalContext<UseColorPickerSwatchPropsContext>('ColorPickerFormatPropsProvider')

@@ -3,7 +3,4 @@ import type { UseMarqueeReturn } from './use-marquee.ts'
 
 export interface UseMarqueeContext extends UseMarqueeReturn {}
 
-export const [MarqueeProvider, useMarqueeContext] = createContext<UseMarqueeContext>({
-  hookName: 'useMarqueeContext',
-  providerName: '<MarqueeProvider />',
-})
+export const [MarqueeProvider, useMarqueeContext] = createContext<UseMarqueeContext>('MarqueeProvider')

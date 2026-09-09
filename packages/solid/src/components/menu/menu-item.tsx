@@ -4,7 +4,7 @@ import { createEffect, createMemo, onCleanup } from 'solid-js'
 import type { Assign } from '../../types.ts'
 import { createSplitProps } from '../../utils/create-split-props.ts'
 import { type HTMLProps, type PolymorphicProps, ark } from '../factory.tsx'
-import { useMenuContext } from './use-menu-context.ts'
+import { useStrictMenuContext } from './use-menu-context.ts'
 import { MenuItemProvider } from './use-menu-item-context.ts'
 import { MenuItemPropsProvider } from './use-menu-option-item-props-context.ts'
 
@@ -26,7 +26,7 @@ export const MenuItem = (props: MenuItemProps) => {
     'valueText',
     'onSelect',
   ])
-  const context = useMenuContext()
+  const context = useStrictMenuContext()
   const mergedProps = mergeProps(() => context().getItemProps(itemProps), localProps)
   const itemState = createMemo(() => context().getItemState(itemProps))
 

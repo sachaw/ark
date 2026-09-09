@@ -46,7 +46,7 @@ export { MenuTrigger, type MenuTriggerBaseProps, type MenuTriggerProps } from '.
 export { MenuTriggerItem, type MenuTriggerItemBaseProps, type MenuTriggerItemProps } from './menu-trigger-item.tsx'
 export { menuAnatomy } from './menu.anatomy.ts'
 export { useMenu, type UseMenuProps, type UseMenuReturn } from './use-menu.ts'
-export { useMenuContext, type UseMenuContext } from './use-menu-context.ts'
+export { useStrictMenuContext, type UseMenuContext } from './use-menu-context.ts'
 export { useMenuItemContext, type UseMenuItemContext } from './use-menu-item-context.ts'
 export type { ValueChangeDetails as MenuValueChangeDetails } from './use-menu-item-group-context.ts'
 

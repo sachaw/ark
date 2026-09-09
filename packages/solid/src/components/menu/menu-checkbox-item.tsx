@@ -3,7 +3,7 @@ import { mergeProps } from '@zag-js/solid'
 import { createMemo } from 'solid-js'
 import { createSplitProps } from '../../utils/create-split-props.ts'
 import { type HTMLProps, type PolymorphicProps, ark } from '../factory.tsx'
-import { useMenuContext } from './use-menu-context.ts'
+import { useStrictMenuContext } from './use-menu-context.ts'
 import { MenuItemProvider } from './use-menu-item-context.ts'
 import { MenuItemPropsProvider } from './use-menu-option-item-props-context.ts'
 
@@ -25,7 +25,7 @@ export const MenuCheckboxItem = (props: MenuCheckboxItemProps) => {
     type: 'checkbox',
   }) as OptionItemProps
 
-  const context = useMenuContext()
+  const context = useStrictMenuContext()
   const mergedProps = mergeProps(() => context().getOptionItemProps(optionItemProps), localProps)
   const optionItemState = createMemo(() => context().getOptionItemState(optionItemProps))
 

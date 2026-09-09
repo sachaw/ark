@@ -3,7 +3,4 @@ import type { UseSplitterReturn } from './use-splitter.ts'
 
 export interface UseSplitterContext extends UseSplitterReturn {}
 
-export const [SplitterProvider, useSplitterContext] = createContext<UseSplitterContext>({
-  hookName: 'useSplitterContext',
-  providerName: '<SplitterProvider />',
-})
+export const [SplitterProvider, useSplitterContext] = createContext<UseSplitterContext>('SplitterProvider')

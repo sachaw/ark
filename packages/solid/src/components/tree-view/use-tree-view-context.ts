@@ -4,7 +4,4 @@ import type { UseTreeViewReturn } from './use-tree-view.ts'
 
 export interface UseTreeViewContext<T extends TreeNode> extends UseTreeViewReturn<T> {}
 
-export const [TreeViewProvider, useTreeViewContext] = createContext<UseTreeViewContext<TreeNode>>({
-  hookName: 'useTreeViewContext',
-  providerName: '<TreeViewProvider />',
-})
+export const [TreeViewProvider, useTreeViewContext] = createContext<UseTreeViewContext<TreeNode>>('TreeViewProvider')

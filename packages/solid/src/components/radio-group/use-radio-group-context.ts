@@ -3,7 +3,4 @@ import type { UseRadioGroupReturn } from './use-radio-group.ts'
 
 export interface UseRadioGroupContext extends UseRadioGroupReturn {}
 
-export const [RadioGroupProvider, useRadioGroupContext] = createContext<UseRadioGroupContext>({
-  hookName: 'useRadioGroupContext',
-  providerName: '<RadioGroupProvider />',
-})
+export const [RadioGroupProvider, useRadioGroupContext] = createContext<UseRadioGroupContext>('RadioGroupProvider')
