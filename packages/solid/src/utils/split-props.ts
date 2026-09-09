@@ -1,4 +1,4 @@
-import { omit } from 'solid-js'
+import { omit, untrack } from 'solid-js'
 
 /**
  * Solid 2 removed `splitProps` in favour of `omit`, which is variadic and
@@ -19,7 +19,12 @@ export function splitProps<T extends Record<any, any>, K extends readonly (keyof
     // buckets the source's own keys, so an absent key stays absent; defining
     // it unconditionally makes it an enumerable `undefined` that then
     // CLOBBERS defaults when the result is spread (`{ id, ...rest }`).
-    if (!(key in props)) continue
+    // Untracked: `key in props` hits the proxy's `has` trap, which is a
+    // reactive read, and this runs in a component body. The key SET is decided
+    // once — exactly as 1.x's splitProps bucketed the source's own keys — so
+    // not updating is the contract, not an oversight. The per-key getters
+    // below stay reactive, which is what callers actually read through.
+    if (!untrack(() => key in props)) continue
     Object.defineProperty(picked, key, {
       enumerable: true,
       configurable: true,
