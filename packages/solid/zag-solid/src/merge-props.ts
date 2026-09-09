@@ -30,7 +30,12 @@ export function mergeProps(...sources: any[]) {
     // sources reactively inside the consumer's own effect.
     if (typeof source === "function") source = untrack(source)
     if (source) {
-      const descriptors = Object.getOwnPropertyDescriptors(source)
+      // Untracked for the same reason the accessor resolve above is: reading
+      // descriptors hits the proxy's `ownKeys` trap, a reactive read made in a
+      // component body. Only the key set is taken here, and it is fixed at
+      // merge time; every value still resolves through the getters below,
+      // inside whichever scope actually reads it.
+      const descriptors = untrack(() => Object.getOwnPropertyDescriptors(source))
       for (const key in descriptors) {
         if (key in target) continue
         Object.defineProperty(target, key, {
