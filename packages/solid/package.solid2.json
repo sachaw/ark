@@ -71,8 +71,8 @@
     "@zag-js/tree-view": "1.43.3",
     "@zag-js/types": "1.43.3",
     "@zag-js/utils": "1.43.3",
-    "solid-js": "2.0.0-rc.6",
-    "@solidjs/web": "2.0.0-rc.6",
+    "solid-js": "2.0.0-rc.13",
+    "@solidjs/web": "2.0.0-rc.13",
     "typescript": "latest"
   }
 }
