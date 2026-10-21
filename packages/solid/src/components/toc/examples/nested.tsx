@@ -1,5 +1,5 @@
 import { Toc } from '@ark-ui/solid/toc'
-import { Dynamic } from '@solidjs/web'
+import { dynamic } from '@solidjs/web'
 import styles from 'styles/toc.module.css'
 
 const items = [
@@ -19,18 +19,19 @@ export const Nested = () => {
   return (
     <Toc.Root class={styles.Root} items={items} scrollEl={() => contentRef}>
       <Toc.Content class={styles.Content} ref={(el) => (contentRef = el)}>
-        {items.map((item) => (
-          <section>
-            <Dynamic component={item.depth === 2 ? 'h2' : 'h3'} id={item.value}>
-              {item.label}
-            </Dynamic>
-            <div class={styles.DummyText}>
-              {[...Array(item.lines)].map(() => (
-                <div class={styles.DummyLine} />
-              ))}
-            </div>
-          </section>
-        ))}
+        {items.map((item) => {
+          const Heading = dynamic(() => (item.depth === 2 ? 'h2' : 'h3'), { static: true })
+          return (
+            <section>
+              <Heading id={item.value}>{item.label}</Heading>
+              <div class={styles.DummyText}>
+                {[...Array(item.lines)].map(() => (
+                  <div class={styles.DummyLine} />
+                ))}
+              </div>
+            </section>
+          )
+        })}
       </Toc.Content>
 
       <Toc.Nav class={styles.Nav}>
