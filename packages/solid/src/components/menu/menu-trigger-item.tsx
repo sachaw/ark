@@ -10,7 +10,7 @@ export const MenuTriggerItem = (props: MenuTriggerItemProps) => {
   const getTriggerItemProps = useMenuTriggerItemContext()
   const mergedProps = mergeProps(() => getTriggerItemProps?.(), props)
   return (
-    <MenuItemPropsProvider value={{ value: mergedProps['data-value'] }}>
+    <MenuItemPropsProvider value={{ value: String(mergedProps['data-value']) }}>
       <ark.div {...mergedProps} />
     </MenuItemPropsProvider>
   )
