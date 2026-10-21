@@ -1,7 +1,7 @@
 import type { JsonNodeHastElement } from '@zag-js/json-tree-utils'
 import { For } from 'solid-js'
 import type { JSX } from '@solidjs/web'
-import { Dynamic } from '@solidjs/web'
+import { dynamic } from '@solidjs/web'
 
 interface JsonTreeViewValueNodeProps {
   node: JsonNodeHastElement
@@ -13,9 +13,9 @@ export const JsonTreeViewValueNode = (props: JsonTreeViewValueNodeProps): JSX.El
     return <>{props.renderValue?.(props.node) ?? props.node.value}</>
   }
 
+  const Element = dynamic(() => (props.node.type === 'text' ? undefined : props.node.tagName))
   return (
-    <Dynamic
-      component={props.node.tagName}
+    <Element
       data-root={props.node.properties.root ? '' : undefined}
       data-type={props.node.properties.nodeType}
       data-kind={props.node.properties.kind}
@@ -23,6 +23,6 @@ export const JsonTreeViewValueNode = (props: JsonTreeViewValueNodeProps): JSX.El
       <For each={props.node.children}>
         {(child) => <JsonTreeViewValueNode node={child} renderValue={props.renderValue} />}
       </For>
-    </Dynamic>
+    </Element>
   )
 }

@@ -1,7 +1,7 @@
 import { Portal } from '@solidjs/web'
 import { Toast, Toaster, createToaster } from '@ark-ui/solid/toast'
 import { CircleAlertIcon, CircleCheckIcon, InfoIcon, TriangleAlertIcon, XIcon } from 'lucide-solid'
-import { Dynamic } from '@solidjs/web'
+import { dynamic } from '@solidjs/web'
 import button from 'styles/button.module.css'
 import styles from 'styles/toast.module.css'
 
@@ -63,11 +63,11 @@ export const Types = () => {
       <Portal>
         <Toaster toaster={toaster}>
           {(toast) => {
-            const icon = () => (toast().type ? iconMap[toast().type as keyof typeof iconMap] : InfoIcon)
+            const Icon = dynamic(() => (toast().type ? iconMap[toast().type as keyof typeof iconMap] : InfoIcon))
             return (
               <Toast.Root class={styles.Root}>
                 <Toast.Title class={styles.Title}>
-                  <Dynamic component={icon()} class={styles.Indicator} />
+                  <Icon class={styles.Indicator} />
                   {toast().title}
                 </Toast.Title>
                 <Toast.Description class={styles.Description}>{toast().description}</Toast.Description>

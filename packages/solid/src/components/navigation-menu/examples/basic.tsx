@@ -10,7 +10,6 @@ import {
   SparklesIcon,
 } from 'lucide-solid'
 import { For } from 'solid-js'
-import { Dynamic } from '@solidjs/web'
 import styles from 'styles/navigation-menu.module.css'
 
 const overviewSections = [
@@ -61,7 +60,7 @@ export const Basic = () => (
                     {(item) => (
                       <NavigationMenu.Link class={styles.LinkCard} href={item.href}>
                         <span class={styles.LinkIcon}>
-                          <Dynamic component={item.icon} />
+                          <item.icon />
                         </span>
                         <span class={styles.LinkCopy}>
                           <span class={styles.LinkTitle}>{item.title}</span>
@@ -91,7 +90,7 @@ export const Basic = () => (
               {(item) => (
                 <NavigationMenu.Link class={styles.LinkCard} href={item.href}>
                   <span class={styles.LinkIcon}>
-                    <Dynamic component={item.icon} />
+                    <item.icon />
                   </span>
                   <span class={styles.LinkCopy}>
                     <span class={styles.LinkTitle}>{item.title}</span>
