@@ -1,6 +1,7 @@
 import { createNormalizer } from "@zag-js/types"
 import { isNumber, isObject, isString } from "@zag-js/utils"
 import type { JSX } from "@solidjs/web"
+import { untrack } from "solid-js"
 
 /**
  * 2.0 widened every JSX attribute to `T | RemoveAttribute` (`undefined | false`).
@@ -75,6 +76,16 @@ export const normalizeProps = createNormalizer<PropTypes>((props: Dict) => {
       if (isString(value)) {
         normalized["textContent"] = value
       }
+      continue
+    }
+
+    // An event handler is imperative: what it reads (a machine's `prop`,
+    // its context) is read once, untracked. The DOM can run one inside a
+    // flush — removing a focused trigger fires its focusout as the list is
+    // reconciled — and there its reads would be held to the effect's strict
+    // reads (STRICT_READ_UNTRACKED), though no handler ever tracks.
+    if (/^on[A-Z]/.test(key) && typeof value === "function") {
+      normalized[toSolidProp(key)] = (...args: unknown[]) => untrack(() => value(...args))
       continue
     }
 
