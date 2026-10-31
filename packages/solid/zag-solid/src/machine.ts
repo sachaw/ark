@@ -1,34 +1,40 @@
 import type {
   ActionsOrFn,
-  GuardFn,
-  Machine,
-  MachineSchema,
-  Service,
+  BindableContext,
   ChooseFn,
   ComputedFn,
+  EffectParams,
+  EffectRecord,
   EffectsOrFn,
-  BindableContext,
+  GuardFn,
+  InputProps,
+  Machine,
+  MachineSchema,
   Params,
+  Service,
 } from "@zag-js/core"
 import {
+  createReplaceTracker,
   createScope,
   findTransition,
   getExitEnterStates,
   hasTag,
   INIT_STATE,
+  isWatchEffect,
   MachineStatus,
   matchesState,
   resolveStateValue,
+  watchEffect,
 } from "@zag-js/core"
-import { callAll, compact, ensure, isFunction, isString, toArray, warn } from "@zag-js/utils"
-import { type Accessor, createMemo, flush as flushSolid, merge, onSettled, untrack } from "solid-js"
+import { compact, ensure, isEqual, isFunction, isString, toArray, warn } from "@zag-js/utils"
+import { type Accessor, createEffect, createMemo, createSignal, flush as flushSolid, merge, onSettled, untrack } from "solid-js"
 import { createBindable } from "./bindable.ts"
 import { createRefs } from "./refs.ts"
 import { createTrack } from "./track.ts"
 
 export function useMachine<T extends MachineSchema>(
   machine: Machine<T>,
-  userProps: Partial<T["props"]> | Accessor<Partial<T["props"]>> = {},
+  userProps: InputProps<T> | Accessor<InputProps<T>> = {} as InputProps<T>,
 ): Service<T> {
   const scope = createMemo(() => {
     const { id, ids, getRootNode } = access(userProps) as any
@@ -92,7 +98,12 @@ export function useMachine<T extends MachineSchema>(
     },
   }
 
-  const effects = { current: new Map<string, VoidFunction>() }
+  const effects = { current: new Map<number, EffectRecord>() }
+  let effectId = 0
+  // Solid does not re-render, so a version bump re-collects the watched deps when the effect set changes;
+  // transitions write it, and they can run inside a computation.
+  const [effectsVersion, setEffectsVersion] = createSignal(0, { ownedWrite: true })
+  const notify = () => setEffectsVersion((n) => n + 1)
   const transitionRef: { current: any } = { current: null }
 
   const previousEventRef: { current: any } = { current: null }
@@ -160,20 +171,76 @@ export function useMachine<T extends MachineSchema>(
     return fn?.(getParams())
   }
 
-  const effect = (keys: EffectsOrFn<T> | undefined) => {
+  const startEffects = (path: string, keys: EffectsOrFn<T> | undefined) => {
     const strs = isFunction(keys) ? keys(getParams()) : keys
     if (!strs) return
-    const fns = strs.map((s) => {
-      const fn = machine.implementations?.effects?.[s]
-      if (!fn) warn(`[zag-js] No implementation found for effect "${JSON.stringify(s)}"`)
-      return fn
-    })
-    const cleanups: VoidFunction[] = []
-    for (const fn of fns) {
-      const cleanup = fn?.(getParams())
-      if (cleanup) cleanups.push(cleanup)
+
+    for (const name of strs) {
+      const fn = machine.implementations?.effects?.[name]
+      if (!fn) {
+        warn(`[zag-js] No implementation found for effect "${JSON.stringify(name)}"`)
+        continue
+      }
+
+      const result = fn({ ...getParams(), watchEffect } as EffectParams<T>)
+
+      // one record per invocation, so a re-entered path keeps every setup's own cleanup
+      const id = ++effectId
+      const record: EffectRecord = { id, path, cleanup: undefined }
+
+      if (isWatchEffect(result)) {
+        record.deps = result.deps
+        record.setup = result.setup
+        const cleanup = result.setup()
+        record.cleanup = isFunction(cleanup) ? cleanup : undefined
+        // snapshot after setup, so a dep that setup itself touches cannot loop
+        record.values = untrack(() => result.deps.map((d) => d()))
+      } else if (isFunction(result)) {
+        record.cleanup = result
+      }
+
+      effects.current.set(id, record)
     }
-    return () => cleanups.forEach((fn) => fn?.())
+
+    notify()
+  }
+
+  const stopEffects = (path: string) => {
+    for (const [id, record] of effects.current) {
+      if (record.path !== path) continue
+      record.cleanup?.("exit")
+      effects.current.delete(id)
+    }
+    notify()
+  }
+
+  const reconcileEffects = (watched: Map<number, unknown[]>) => {
+    if (status !== MachineStatus.Started) return
+
+    let stale: EffectRecord[] | undefined
+
+    for (const [id, next] of watched) {
+      const record = effects.current.get(id)
+      if (!record) continue
+      if (!next.some((value, index) => !isEqual(record.values![index], value))) continue
+      record.values = next
+      // setup() reads live values, so an already-queued restart covers this change too
+      if (record.pending) continue
+      record.pending = true
+      ;(stale ??= []).push(record)
+    }
+
+    if (!stale) return
+
+    queueMicrotask(() => {
+      for (const record of stale) {
+        record.pending = false
+        if (!effects.current.has(record.id)) continue
+        record.cleanup?.("restart")
+        const cleanup = untrack(() => record.setup!())
+        record.cleanup = isFunction(cleanup) ? cleanup : undefined
+      }
+    })
   }
 
   const choose: ChooseFn<T> = (transitions) => {
@@ -204,9 +271,7 @@ export function useMachine<T extends MachineSchema>(
       const { exiting, entering } = getExitEnterStates(machine, prevState, nextState, transitionRef.current?.reenter)
 
       exiting.forEach((item) => {
-        const exitEffects = effects.current.get(item.path)
-        exitEffects?.()
-        effects.current.delete(item.path)
+        stopEffects(item.path)
       })
 
       exiting.forEach((item) => {
@@ -216,20 +281,12 @@ export function useMachine<T extends MachineSchema>(
       action(transitionRef.current?.actions)
 
       entering.forEach((item) => {
-        const cleanup = effect(item.state?.effects)
-        if (cleanup) {
-          const existing = effects.current.get(item.path)
-          effects.current.set(item.path, existing ? callAll(existing, cleanup) : cleanup)
-        }
+        startEffects(item.path, item.state?.effects)
       })
 
       if (prevState === INIT_STATE) {
         action(machine.entry)
-        const cleanup = effect(machine.effects)
-        if (cleanup) {
-          const existing = effects.current.get(INIT_STATE)
-          effects.current.set(INIT_STATE, existing ? callAll(existing, cleanup) : cleanup)
-        }
+        startEffects(INIT_STATE, machine.effects)
       }
 
       entering.forEach((item) => {
@@ -254,8 +311,7 @@ export function useMachine<T extends MachineSchema>(
       debug("unmounting...")
       status = MachineStatus.Stopped
 
-      const fns = effects.current
-      fns.forEach((fn) => fn?.())
+      effects.current.forEach((record) => record.cleanup?.("exit"))
       effects.current = new Map()
       transitionRef.current = null
 
@@ -263,8 +319,13 @@ export function useMachine<T extends MachineSchema>(
     }
   })
 
+  const replaceTracker = createReplaceTracker()
+
   const send = (event: any) => {
+    const key = event.replaces
+    const token = key ? replaceTracker.claim(key) : undefined
     queueMicrotask(() => {
+      if (key && token && replaceTracker.isReplaced(key, token)) return
       if (status !== MachineStatus.Started) return
 
       previousEventRef.current = eventRef.current
@@ -297,6 +358,19 @@ export function useMachine<T extends MachineSchema>(
   }
 
   machine.watch?.(getParams())
+
+  // The watched deps are read in the tracked half, the restarts happen in the untracked one.
+  createEffect(
+    () => {
+      effectsVersion()
+      const watched = new Map<number, unknown[]>()
+      for (const record of effects.current.values()) {
+        if (record.deps) watched.set(record.id, record.deps.map((d) => d()))
+      }
+      return watched
+    },
+    reconcileEffects,
+  )
 
   return {
     state: getState(),
