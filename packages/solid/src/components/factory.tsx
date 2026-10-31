@@ -1,6 +1,6 @@
 import { mergeProps } from '@zag-js/solid'
 import { warn } from '@zag-js/utils'
-import { type Accessor, omit } from 'solid-js'
+import { type Accessor, omit, untrack } from 'solid-js'
 import type { JSX } from '@solidjs/web'
 import { dynamic } from '@solidjs/web'
 import type { Assign } from '../types.ts'
@@ -101,18 +101,21 @@ const withRender = <T extends ElementType>(Component: T) => {
   const ArkComponent: ArkComponent<T> = (props) => {
     const localProps = props as FactoryProps
     const parentProps = omit(localProps, 'asChild', 'render', 'state')
+    // Read once: the element is chosen when the part is made. Untracked, since a part's props are often a merge
+    // whose every key reads the machine.
+    const { render, asChild } = untrack(() => ({ render: localProps.render, asChild: localProps.asChild }))
 
     warn(
-      Boolean(localProps.asChild) && Boolean(localProps.render),
+      Boolean(asChild) && Boolean(render),
       '[ark-ui] `asChild` and `render` cannot be used together. Prefer `render`.',
     )
 
-    if (localProps.render || localProps.asChild) {
+    if (render || asChild) {
       // the caller applies the props itself, so only the ref is left to us
       const restProps = omit(parentProps, 'ref')
       const propsFn = (userProps?: JSX.IntrinsicElements[T]) => mergeProps(restProps, userProps ?? {})
-      if (localProps.render) return localProps.render(propsFn, () => localProps.state ?? EMPTY_STATE)
-      return localProps.asChild!(propsFn)
+      if (render) return render(propsFn, () => localProps.state ?? EMPTY_STATE)
+      return asChild!(propsFn)
     }
 
     // @ts-expect-error generic element props can't be expressed against Dynamic
