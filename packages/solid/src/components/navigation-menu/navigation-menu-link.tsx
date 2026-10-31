@@ -14,7 +14,11 @@ const splitLinkProps = createSplitProps<LinkProps>()
 
 export const NavigationMenuLink = (props: NavigationMenuLinkProps) => {
   const itemContext = useNavigationMenuItemPropsContext()
-  const value = createMemo(() => props.value ?? itemContext?.value)
+  const value = createMemo(() => {
+    const value = props.value ?? itemContext?.value
+    if (value === undefined) throw new Error('NavigationMenu.Link takes a value, or sits inside a NavigationMenu.Item')
+    return value
+  })
 
   const combinedProps = mergeProps(props, () => ({ value: value() }))
   const [linkProps, localProps] = splitLinkProps(combinedProps, ['current', 'onSelect', 'value', 'closeOnClick'])

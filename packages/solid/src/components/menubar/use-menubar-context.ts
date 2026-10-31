@@ -1,10 +1,8 @@
-import { createContext } from '../../utils/create-context.ts'
+import { createOptionalContext } from '../../utils/create-context.ts'
 import type { UseMenubarReturn } from './use-menubar.ts'
 
 export interface UseMenubarContext extends UseMenubarReturn {}
 
-export const [MenubarProvider, useMenubarContext] = createContext<UseMenubarContext>({
-  hookName: 'useMenubarContext',
-  providerName: '<MenubarProvider />',
-  strict: false,
-})
+// Optional: a menu reads it to find the menubar it sits in, and most menus sit in none.
+export const [MenubarProvider, useMenubarContext, useStrictMenubarContext] =
+  createOptionalContext<UseMenubarContext>('MenubarProvider')

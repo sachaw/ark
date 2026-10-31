@@ -3,7 +3,4 @@ import { createContext } from '../../utils/create-context.ts'
 
 export interface UseWindowVirtualizerContext extends WindowVirtualizer {}
 
-export const [WindowVirtualizerProvider, useWindowVirtualizerContext] = createContext<UseWindowVirtualizerContext>({
-  hookName: 'useWindowVirtualizerContext',
-  providerName: '<WindowVirtualizer.Root />',
-})
+export const [WindowVirtualizerProvider, useWindowVirtualizerContext] = createContext<UseWindowVirtualizerContext>('WindowVirtualizerProvider')

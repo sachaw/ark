@@ -1,5 +1,5 @@
 import { useSyncExternalStore } from '@zag-js/solid'
-import { createComputed, createMemo, onCleanup, onMount, untrack } from 'solid-js'
+import { createEffect, createMemo, onCleanup, onSettled, untrack } from 'solid-js'
 import type { MaybeAccessor } from '../../types.ts'
 import { runIfFn } from '../../utils/run-if-fn.ts'
 
@@ -22,19 +22,20 @@ export function useVirtualizerStore<Options extends object, T extends Virtualize
   const virtualizer = create(applied)
   const snapshot = useSyncExternalStore(virtualizer.subscribe, virtualizer.getSnapshot)
 
-  const sync = () => {
-    const next = options()
+  const apply = (next: Options) => {
     if (next === applied) return
     applied = next
     untrack(() => virtualizer.updateOptions(next))
   }
+  // a read through the proxy applies first, so it never sees options a frame old
+  const sync = () => apply(options())
 
-  createComputed(sync)
+  createEffect(options, apply)
 
   let scrollElement: HTMLElement | null = null
   let mounted = false
 
-  onMount(() => {
+  onSettled(() => {
     mounted = true
     if (scrollElement) virtualizer.init(scrollElement)
   })

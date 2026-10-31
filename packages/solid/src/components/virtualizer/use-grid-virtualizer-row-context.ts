@@ -4,7 +4,4 @@ import { createContext } from '../../utils/create-context.ts'
 
 export interface UseGridVirtualizerRowContext extends Accessor<VirtualRow> {}
 
-export const [GridVirtualizerRowProvider, useGridVirtualizerRowContext] = createContext<UseGridVirtualizerRowContext>({
-  hookName: 'useGridVirtualizerRowContext',
-  providerName: '<GridVirtualizer.Row />',
-})
+export const [GridVirtualizerRowProvider, useGridVirtualizerRowContext] = createContext<UseGridVirtualizerRowContext>('GridVirtualizerRowProvider')

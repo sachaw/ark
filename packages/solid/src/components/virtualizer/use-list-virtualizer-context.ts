@@ -3,7 +3,4 @@ import { createContext } from '../../utils/create-context.ts'
 
 export interface UseListVirtualizerContext extends ListVirtualizer {}
 
-export const [ListVirtualizerProvider, useListVirtualizerContext] = createContext<UseListVirtualizerContext>({
-  hookName: 'useListVirtualizerContext',
-  providerName: '<ListVirtualizer.Root />',
-})
+export const [ListVirtualizerProvider, useListVirtualizerContext] = createContext<UseListVirtualizerContext>('ListVirtualizerProvider')

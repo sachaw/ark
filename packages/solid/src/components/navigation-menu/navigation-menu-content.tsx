@@ -23,7 +23,11 @@ export const NavigationMenuContent = (props: NavigationMenuContentProps) => {
   const api = useNavigationMenuContext()
   const itemContext = useNavigationMenuItemPropsContext()
 
-  const value = createMemo(() => props.value ?? itemContext?.value)
+  const value = createMemo(() => {
+    const value = props.value ?? itemContext?.value
+    if (value === undefined) throw new Error('NavigationMenu.Content takes a value, or sits inside a NavigationMenu.Item')
+    return value
+  })
   const combinedProps = mergeProps(props, () => ({ value: value() }))
 
   const [contentProps, localProps] = splitContentProps(combinedProps, ['value'])
@@ -42,6 +46,12 @@ export const NavigationMenuContent = (props: NavigationMenuContentProps) => {
   const viewportNode = createMemo(() => (api().isViewportRendered ? api().getViewportNode() : null))
   const isViewportRendered = createMemo(() => api().isViewportRendered)
 
+  // Hoisted and untracked: `ref` is evaluated EAGERLY when the child is
+  // constructed, and a flow component constructs its child inside a tracking
+  // memo — so reading an accessor here subscribes THAT memo to this state and
+  // every change re-creates the element. The ref setter itself never changes.
+  const presenceApiRef = untrack(() => presenceApi().ref)
+
   const content = (
     <PresenceProvider value={presenceApi}>
       <Show when={!presenceApi().unmounted}>
@@ -53,12 +63,6 @@ export const NavigationMenuContent = (props: NavigationMenuContentProps) => {
       </Show>
     </PresenceProvider>
   )
-
-  // Hoisted and untracked: `ref` is evaluated EAGERLY when the child is
-  // constructed, and a flow component constructs its child inside a tracking
-  // memo — so reading an accessor here subscribes THAT memo to this state and
-  // every change re-creates the element. The ref setter itself never changes.
-  const presenceApiRef = untrack(() => presenceApi().ref)
 
   return (
     <Show when={isViewportRendered() && viewportNode()} fallback={content}>
