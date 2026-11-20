@@ -7,7 +7,7 @@ export interface PaginationPrevTriggerProps extends HTMLProps<'button'>, Paginat
 
 export const PaginationPrevTrigger = (props: PaginationPrevTriggerProps) => {
   const api = usePaginationContext()
-  const mergedProps = mergeProps(() => api().getPrevTriggerProps(), props)
+  const mergedProps = mergeProps(() => api().getPreviousTriggerProps(), props)
 
   return <ark.button {...mergedProps} />
 }
